@@ -29,7 +29,8 @@ sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 mkdir -p -m 0777 /mnt/registry
 
 echo "Cloning artifacts repo"
-cd ~/ && git clone -b $GIT_CI https://github.com/5growth/5gr-ci > /dev/null 2>&1 && echo "Artifact repo cloned (branch: $GIT_CI)"
+cd ~/ 
+git clone https://github.com/5growth/5gr-ci > /dev/null 2>&1 && echo "Artifact repo cloned (branch: $GIT_CI)"
 
 echo "Starting private regestry"
 sudo docker run -d -p 5000:5000   --restart=always   --name registry -v /mnt/registry:/var/lib/registry  registry:2
@@ -76,7 +77,7 @@ cat << EOF > cfy.sh
 sudo docker-compose up -d
 sleep 3
 sudo docker exec cfy_mano_local bash -c "until cfy plugins upload http://repository.cloudifysource.org/cloudify/wagons/cloudify-openstack-plugin/2.14.7/cloudify_openstack_plugin-2.14.7-py27-none-linux_x86_64-centos-Core.wgn -y http://www.getcloudify.org/spec/openstack-plugin/2.14.7/plugin.yaml; do echo nicht; done"
-sudo docker exec cfy_mano_local bash -c "until cfy plugins upload /home/centos/cloudify_mtp_plugin-0.0.1-centos-Core-py27.py36-none-linux_x86_64.wgn -y /home/centos/plugin.yaml; do echo nicht; done"
+sudo docker exec cfy_mano_local bash -c "until cfy plugins upload /home/centos/cloudify_mtp_plugin-0.0.1-py27-none-manylinux1_x86_64.wgn -y /home/centos/plugin.yaml; do echo nicht; done"
 EOF
 
 bash cfy.sh

@@ -22,16 +22,16 @@ Main goals of the 5Growth CI/CD in the project are:
 * Create deployment automation for 5Growth platform;
 * Create all-in-one environment for development experiments and familiarization with the platform.
 
-Software development support explained in [architecture and workflow file](docs/architecture.md).
+Software development support explained in architecture and workflow [file](docs/architecture.md).
 
-Deployment automation for 5Growth platform explained in [5growth platform deployment file](docs/containerization.md).
+Deployment automation for 5Growth platform explained in 5growth platform deployment [file](docs/containerization.md).
 
-All-in-one environment described in [developer's environment file](docs/platform deployment.md)
+All-in-one environment described in developer's environment [file](docs/platform%20deployment.md).
 
 
 ### 5Growth CI/CD 
 
-The CI/CD – is a software development concept and a set of practices targeted to automate and simplify the software development and deployment procedures. The 5Growth CI/CD, consists of two parts – Continuous Integration (CI) responsible for automated testing of a new code, and Continuous Deployment (CD) responsible for simple, repeatable, and reliable deployment. 5Growth CI/CD is built around and uses repositories, compute resources and network infrastructure of the project and integrated into it. For more details regarding 5Growth CI/CD, its architecture, flows and infrastructure please refer to D2.3 [1] section 3.3.2. 
+The CI/CD – is a software development concept and a set of practices targeted to automate and simplify the software development and deployment procedures. The 5Growth CI/CD, consists of two parts – Continuous Integration (CI) responsible for automated testing of a new code, and Continuous Deployment (CD) responsible for simple, repeatable, and reliable deployment. 5Growth CI/CD is built around and uses repositories, compute resources and network infrastructure of the project and integrated into it. For more details regarding 5Growth CI/CD, its architecture, flows and infrastructure please refer to D2.3 section 3.3.2. 
 
 High-level representation is described on Figure 12. 
 

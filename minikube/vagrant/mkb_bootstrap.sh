@@ -39,7 +39,7 @@ sudo chown -R $USER:$USER $HOME/.kube $HOME/.minikube
 EOF
 
 #&v
-git clone -b $GIT_CI https://github.com/5growth/5gr-ci
+git clone https://github.com/5growth/5gr-ci
 for file in $(ls *.y*aml)
 do
 #&v
