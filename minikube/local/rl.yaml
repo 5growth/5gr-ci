@@ -1661,7 +1661,6 @@ spec:
         env:
         - name:  MYSQL_ROOT_PASSWORD
           value: "root"
-#        command: ["sh", "-c", "cp -f /docker-entrypoint-initdb.d/temp/1_create_rl_user.sql /docker-entrypoint-initdb.d/1_create_rl_user.sql && cp -f /docker-entrypoint-initdb.d/temp/2_rlscheme.sql /docker-entrypoint-initdb.d/2_rlscheme.sql && /entrypoint.sh mysqld"]
         ports:
         - containerPort: 3306
 ---

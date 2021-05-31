@@ -40,15 +40,15 @@ sed -i 's/${TAG}/local/g' docker-compose.y*ml
 sed -i "s/GIT_BRANCH=.*/GIT_BRANCH=$2/" $1_build_docker.sh
 }
 
-cd ~/5growth.5gr-ci/containerization/monitoring_platform/	&& script_mod mon $GIT_MON	&& bash mon_build_docker.sh
-cd ~/5growth.5gr-ci/containerization/rl				&& script_mod rl $GIT_RL	&& ./rl_build_docker.sh
-cd ~/5growth.5gr-ci/containerization/so				&& script_mod so $GIT_SO	&& ./so_build_docker.sh
-cd ~/5growth.5gr-ci/containerization/vertical_slicer/           && script_mod vs $GIT_VS 	&& ./vs_build_docker.sh
+cd ~/5gr-ci/containerization/monitoring_platform/	&& script_mod mon $GIT_MON	&& bash mon_build_docker.sh
+cd ~/5gr-ci/containerization/rl				&& script_mod rl $GIT_RL	&& ./rl_build_docker.sh
+cd ~/5gr-ci/containerization/so				&& script_mod so $GIT_SO	&& ./so_build_docker.sh
+cd ~/5gr-ci/containerization/vertical_slicer/           && script_mod vs $GIT_VS 	&& ./vs_build_docker.sh
 
 sudo docker images | grep local | awk '{print $1":"$2}' | xargs -I % sudo docker tag  %  "img:5000/"%
 sudo docker images | grep 5000 | awk '{print $1":"$2}' | xargs -I % sudo docker push %
 
-cd ~/5growth.5gr-ci/containerization/cfy/
+cd ~/5gr-ci/containerization/cfy/
 
 cp docker-compose.yaml docker-compose.yaml.bkp
 cat << EOF > docker-compose.yaml

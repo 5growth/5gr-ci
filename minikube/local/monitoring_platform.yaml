@@ -68,41 +68,40 @@ data:
     		password => "changeme"
     	}
     }
-#  config.properties: |
-#    server.port=8989
-#    server.ip=10.5.1.175
-#    
-#    prometheus.config=/mon/mon-core/prometheus/prometheus.yml
-#    prometheus.alertRules=/mon/mon-core/prometheus/alert.rules
-#    prometheus.alertManager=/mon/mon-core/alertmanager/alertmanager.yml
-#    logstash.config=/mon/mon-core/logstash/logstash.conf
-#    prometheus.calculateRules=/mon/mon-core/prometheus/calculate.rules
-#    
-#    
-#    
-#    grafana.host=mon_grafana
-#    grafana.port=3000
-#    grafana.token=key
-#    
-#    prometheus.host=mon_prometheus
-#    prometheus.port=9090
-#    
-#    alertmanager.host=mon_alertmanager
-#    alertmanager.port=9093
-#    
-#    # levels: TRACE, DEBUG, INFO, WARN, ERROR
-#    logging.level=INFO
-#    prometheus.PushGateway.group.id=prometheus
-#    prometheus.PushGateway.topic=prometheus
-#    kafka.bootstrap.servers=10.5.1.175:9092
-#    
-#    kibana.host=127.0.0.1
-#    kibana.port=5601
-#    
-#    mongodb.host=127.0.0.1
-#    mongodb.port=27017
-#  exporters.json: |   #./config-manager-nxw/src/main/resources/exporters.json
-#  fileserver: |       #/mon_git/
+  config.properties: |
+   server.port=8989
+    server.ip=10.168.123.9
+    
+    prometheus.config=/mon/mon-core/prometheus/prometheus.yml
+    prometheus.alertRules=/mon/mon-core/prometheus/alert.rules
+    prometheus.alertManager=/mon/mon-core/alertmanager/alertmanager.yml
+    logstash.config=/mon/mon-core/logstash/logstash.conf
+    prometheus.calculateRules=/mon/mon-core/prometheus/calculate.rules
+    # modes hostname or ID
+    rvmagent.identifiermode=hostname
+    
+    
+    grafana.host=mon-grafana
+    grafana.port=3000
+    grafana.token=eyJrIjoicWFybldXbm1IOFc1SHBuU0toRjNGWDBFR0JlV2FRaVMiLCJuIjoiYXBpa2V5Y3VybCIsImlkIjoxfQ==
+    
+    prometheus.host=mon-prometheus
+    prometheus.port=9090
+    
+    alertmanager.host=mon-alertmanager
+    alertmanager.port=9093
+    
+    # levels: TRACE, DEBUG, INFO, WARN, ERROR
+    logging.level=INFO
+    prometheus.PushGateway.group.id=prometheus
+    prometheus.PushGateway.topic=prometheus
+    kafka.bootstrap.servers=10.168.123.9:9092
+    
+    kibana.host=127.0.0.1
+    kibana.port=5601
+    
+    mongodb.host=127.0.0.1
+    mongodb.port=27017
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -111,10 +110,7 @@ metadata:
 data:
   mpscript.sh: |
     #!/bin/bash
-    until wget -q http://repo-configs:8089; do echo waiting for repo-configs; sleep 1; done
-    wget http://repo-configs:8089/5growth.5gr-ci/containerization/monitoring_platform/mon_app/config.properties -O /mon/config-manager-nxw/config.properties
-    sed -i 's/.host=mon_/.host=mon-/g' /mon/config-manager-nxw/config.properties
-    sed -i 's/kafka.bootstrap.servers=.*/kafka.bootstrap.servers=10.168.123.9:9092/g' /mon/config-manager-nxw/config.properties
+    cp -f /mon/mon-core/tmp/config.properties /mon/config-manager-nxw/config.properties
     bash /mon/config-manager-nxw/configure_grafana.sh mon-grafana
 ---
 apiVersion: v1
@@ -162,6 +158,8 @@ spec:
               path: prometheus/prometheus.yml
             - key: logstash.conf
               path: logstash/logstash.conf
+            - key: config.properties
+              path: tmp/config.properties
       - name: mon-script-config-volume-wget
         configMap:
           name: mon-script-config-wget
@@ -169,13 +167,12 @@ spec:
       - name: mon-platform
         image: img:5000/mon_platform:local
         imagePullPolicy: IfNotPresent
-#        command: ["sh", "-c", "cp -f /mon/temp/config.properties /mon/config-manager-nxw/config.properties && sed -i 's/.host=mon_/.host=mon-/g' /mon/config-manager-nxw/config.properties && sed -i 's/kafka.bootstrap.servers=.*/kafka.bootstrap.servers=10.168.123.9:9092/g' /mon/config-manager-nxw/config.properties && bash /mon/config-manager-nxw/configure_grafana.sh mon-grafana"]
         command: ["sh", "-c", "bash /mon/mon-core/cm/mpscript.sh"]
         volumeMounts:
           - name: mon-volume
             mountPath: /mon/mon-core
-          - name: mon-prps
-            mountPath: /mon/temp
+#          - name: mon-prps
+#            mountPath: /mon/temp
           - name: mon-script-config-volume-wget
             mountPath: /mon/mon-core/cm
         ports:
@@ -954,50 +951,6 @@ spec:
     protocol: TCP
   selector:
     app: mon-broker
-#---
-#kind: StorageClass
-#apiVersion: storage.k8s.io/v1
-#metadata:
-#  name: broker
-#provisioner: kubernetes.io/no-provisioner
-#volumeBindingMode: WaitForFirstConsumer
-#allowVolumeExpansion: true
-#---
-#apiVersion: v1
-#kind: PersistentVolume
-#metadata:
-#    name: broker
-#spec:
-#  capacity:
-#    storage: 2Gi
-#  volumeMode: Filesystem
-#  accessModes:
-#    - ReadWriteOnce
-#  persistentVolumeReclaimPolicy: Retain
-#  storageClassName: broker
-#  local:
-#    path: /storage01/broker
-#  nodeAffinity:
-#    required:
-#      nodeSelectorTerms:
-#      - matchExpressions:
-#        - key: kubernetes.io/hostname
-#          operator: In
-#          values:
-#            - minikube
-#---
-#kind: PersistentVolumeClaim
-#apiVersion: v1
-#metadata:
-#  name: broker
-#spec:
-#  storageClassName: broker
-#  accessModes:
-#    - ReadWriteOnce
-#  volumeMode: Filesystem
-#  resources:
-#    requests:
-#      storage: 2Gi
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -1055,8 +1008,3 @@ spec:
         volumeMounts:
           - name: broker-data
             mountPath: /var/lib/kafka/data
-#      volumes:
-#      - name: broker-data
-#        persistentVolumeClaim:
-#          claimName: broker
-

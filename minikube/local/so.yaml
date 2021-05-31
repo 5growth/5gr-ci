@@ -5,8 +5,6 @@ metadata:
   name: so-script-config
 data:
   soscript.sh: |
-    #until wget -q http://repo-configs:8089; do echo waiting for repo-configs; sleep 1; done
-    #wget http://repo-configs:8089/5growth.5gr-ci/containerization/so/so_app/config/coreMano.properties -O /usr/src/app/5Gr-SO/coreMano/coreMano.properties
     cp -f /usr/src/app/5Gr-SO/tmp/cm/coreMano.properties                   /usr/src/app/5Gr-SO/coreMano/coreMano.properties
     cp -f /usr/src/app/5Gr-SO/tmp/cm/db.properties                         /usr/src/app/5Gr-SO/db/db.properties
     cp -f /usr/src/app/5Gr-SO/tmp/cm/mtp.properties                        /usr/src/app/5Gr-SO/mtp.properties
@@ -16,20 +14,6 @@ data:
     cp -f /usr/src/app/5Gr-SO/tmp/cm/vs.properties                         /usr/src/app/5Gr-SO/sm/soe/vs.properties
     cp -f /usr/src/app/5Gr-SO/tmp/cm/federation.properties                 /usr/src/app/5Gr-SO/sm/soe/federation.properties
     cp -f /usr/src/app/5Gr-SO/tmp/cm/start.sh                              /usr/src/app/5Gr-SO/nbi/python-flask-server/start.sh
-    #wget http://repo-configs:8089/5growth.5gr-ci/containerization/so/so_app/config/db.properties -O /usr/src/app/5Gr-SO/db/db.properties
-    #sed -i 's/so_mongo/so-mongo/g' /usr/src/app/5Gr-SO/db/db.properties 
-    #wget http://repo-configs:8089/5growth.5gr-ci/containerization/so/so_app/config/mtp.properties -O /usr/src/app/5Gr-SO/mtp.properties
-    #wget http://repo-configs:8089/5growth.5gr-ci/containerization/so/so_app/config/rooe.properties -O /usr/src/app/5Gr-SO/sm/rooe/rooe.properties
-    #wget http://repo-configs:8089/5growth.5gr-ci/containerization/so/so_app/config/vim.properties -O /usr/src/app/5Gr-SO/coreMano/vim.properties
-    #wget http://repo-configs:8089/5growth.5gr-ci/containerization/so/so_app/config/monitoring.properties -O /usr/src/app/5Gr-SO/monitoring/monitoring.properties
-    #sed -i 's/mon_platform/mon-platform/g' /usr/src/app/5Gr-SO/monitoring/monitoring.properties 
-    #wget http://repo-configs:8089/5growth.5gr-ci/containerization/so/so_app/config/vs.properties -O /usr/src/app/5Gr-SO/sm/soe/vs.properties
-    #sed -i 's/vs_app/vs-app/g' /usr/src/app/5Gr-SO/sm/soe/vs.properties 
-    #sed -i 's/10.0.200.234/172.17.0.1/g' /usr/src/app/5Gr-SO/sm/soe/vs.properties 
-    #wget http://repo-configs:8089/5growth.5gr-ci/containerization/so/so_app/config/federation.properties -O /usr/src/app/5Gr-SO/sm/soe/federation.properties
-    #wget -r http://repo-configs:8089/5growth.5gr-ci/containerization/so/so_app/config/test/
-    #cp -rf repo-configs\:8089/5growth.5gr-ci/containerization/so/so_app/config/test/* /usr/src/app/5Gr-SO/test/
-    #sed -i 's/vs_app/vs-app/g' /usr/src/app/5Gr-SO/test/run_vs_test.py  
     cp -f /usr/src/app/5Gr-SO/test/tmp/regression_test_scale.py       /usr/src/app/5Gr-SO/test/regression_test_scale.py
     cp -f /usr/src/app/5Gr-SO/test/tmp/run_vs_test.py                 /usr/src/app/5Gr-SO/test/run_vs_test.py
     cp -f /usr/src/app/5Gr-SO/test/tmp/requiements.txt /usr/src/app/5Gr-SO/test/requiements.txt
@@ -39,25 +23,6 @@ data:
     cat /usr/src/app/5Gr-SO/test/json/CDN_SPR2_VNFD_0_9.json          | tee /usr/src/app/5Gr-SO/descriptors/CDN_SPR2_VNFD_0_9.json
     cat /usr/src/app/5Gr-SO/test/json/CDN_SPR1_VNFD_0_9.json          | tee /usr/src/app/5Gr-SO/descriptors/CDN_SPR1_VNFD_0_9.json
     cat /usr/src/app/5Gr-SO/test/json/CDN_PROBE_VNFD_0_9.json         | tee /usr/src/app/5Gr-SO/descriptors/CDN_PROBE_VNFD_0_9.json
-
-    #sed -i 's/10.5.1.187/vs-file-share/g' /usr/src/app/5Gr-SO/test/json/*  
-    #sed -i 's/10.5.1.187/10.168.123.9/g' /usr/src/app/5Gr-SO/mtp.properties  
-    #sed -i 's/10.5.1.68/10.168.123.11/g' /usr/src/app/5Gr-SO/coreMano/coreMano.properties 
-    #wget -r http://repo-configs:8089/5growth.5gr-ci/containerization/so/so_app/config/descriptors/
-    #cp -rf repo-configs\:8089/5growth.5gr-ci/containerization/so/so_app/config/descriptors/ /usr/src/app/5Gr-SO/
-    #sed -i 's/so_mongo/so-mongo/g' /usr/src/app/5Gr-SO/test/run_vs_test.py  
-    #sed -i 's/probeserver_open/cirros-0.5.1-x86_64-disk/g' /usr/src/app/5Gr-SO/descriptors/CDN_*_VNFD_0_9* 
-    #sed -i 's/probeserver_open/cirros-0.5.1-x86_64-disk/g' /usr/src/app/5Gr-SO/test/json/CDN_*_VNFD_0_9* 
-    #sed -i 's/SPR1_open/cirros-0.5.1-x86_64-disk/g' /usr/src/app/5Gr-SO/descriptors/CDN_*_VNFD_0_9* 
-    #sed -i 's/SPR1_open/cirros-0.5.1-x86_64-disk/g' /usr/src/app/5Gr-SO/test/json/CDN_*_VNFD_0_9* 
-    #sed -i 's/SPR2_open/cirros-0.5.1-x86_64-disk/g' /usr/src/app/5Gr-SO/descriptors/CDN_*_VNFD_0_9* 
-    #sed -i 's/SPR2_open/cirros-0.5.1-x86_64-disk/g' /usr/src/app/5Gr-SO/test/json/CDN_*_VNFD_0_9* 
-    #sed -i 's/WEBSERVER_open/cirros-0.5.1-x86_64-disk/g' /usr/src/app/5Gr-SO/descriptors/CDN_*_VNFD_0_9* 
-    #sed -i 's/WEBSERVER_open/cirros-0.5.1-x86_64-disk/g' /usr/src/app/5Gr-SO/test/json/CDN_*_VNFD_0_9*
-    #sed -i 's/xenial-server-cloudimg-amd64-disk1/cirros-0.5.1-x86_64-disk/g' /usr/src/app/5Gr-SO/descriptors/CDN_*_VNFD_0_9* 
-    #sed -i 's/xenial-server-cloudimg-amd64-disk1/cirros-0.5.1-x86_64-disk/g' /usr/src/app/5Gr-SO/test/json/CDN_*_VNFD_0_9* 
-    #rm -rf /usr/src/app/5Gr-SO/nbi/python-flask-server/start.sh*
-    #wget http://repo-configs:8089/5growth.5gr-ci/containerization/so/so_app/start.sh -O /usr/src/app/5Gr-SO/nbi/python-flask-server/start.sh
     bash /usr/src/app/5Gr-SO/nbi/python-flask-server/start.sh
   coreMano.properties: |
     [CoreMano]
@@ -1177,7 +1142,6 @@ spec:
       containers:
       - name: so-pa-generic
         image: img:5000/pa_generic:local
-#        command: ["sh", "-c", "cp -f  /PA/temp/settings.conf  /PA/settings.conf && python /PA/ga_frontend.py -c settings.conf"]
         command: ["sh", "-c", "cp -f  /PA/cm/settings.conf  /PA/settings.conf && python /PA/ga_frontend.py -c settings.conf"]
         volumeMounts:
           - name: config
@@ -1205,7 +1169,6 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-#  name: so-mongo-deployment
   name: so-mongo-ss
 spec:
   serviceName: so-mongo
@@ -1224,47 +1187,4 @@ spec:
         image: mongo:3.6
         ports:
         - containerPort: 27017
-#---
-#kind: StorageClass
-#apiVersion: storage.k8s.io/v1
-#metadata:
-#  name: so-mongo
-#provisioner: kubernetes.io/no-provisioner #?
-#volumeBindingMode: WaitForFirstConsumer   #?
-#allowVolumeExpansion: true
-#---
-#apiVersion: v1
-#kind: PersistentVolume
-#metadata:
-#    name: so-mongo
-#spec:
-#  capacity:
-#    storage: 2Gi                        #?
-#  volumeMode: Filesystem                #?
-#  accessModes:
-#    - ReadWriteOnce                     #?
-#  persistentVolumeReclaimPolicy: Retain #?
-#  storageClassName: so-mongo
-#  local:
-#    path: /storage01
-#  nodeAffinity:
-#    required:
-#      nodeSelectorTerms:
-#      - matchExpressions:
-#        - key: kubernetes.io/hostname
-#          operator: In
-#          values:
-#            - minikube
-#---
-#kind: PersistentVolumeClaim
-#apiVersion: v1
-#metadata:
-#  name: so-mongo
-#spec:
-#  storageClassName: so-mongo
-#  accessModes:
-#    - ReadWriteOnce
-#  volumeMode: Filesystem
-#  resources:
-#    requests:
-#      storage: 1Gi
+

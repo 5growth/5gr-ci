@@ -86,15 +86,14 @@ VBoxManage natnetwork add --netname 5gnat --network "10.11.2.0/24" --enable --dh
 
 5. Clone 5growth CI repository
 
-<!--git clone https://5growth.eu/git/5growth.5gr-ci -->
 ```
 https://github.com/5growth/5gr-ci
 ```
 
-6. Change to directory 5growth.5gr-ci/minikube/vagrant
+6. Change to directory 5gr-ci/minikube/vagrant
 
 ```
-cd 5growth.5gr-ci/minikube/vagrant
+cd 5gr-ci/minikube/vagrant
 
 ```
 
@@ -222,7 +221,7 @@ Table 1. Nodes and services access
    <td>Manifest is in folder:
 
 <p>
-/home/vagrant/scripts/5growth.5gr-ci
+/home/vagrant/scripts/5gr-ci
    </td>
   </tr>
   <tr>
@@ -267,7 +266,7 @@ Table 1. Nodes and services access
 *   Minimum RAM amount 16GB;
 *   Minimum disk space 30GB.
 
-To tune RAM and CPU amount it is required to change correspondent value in the 5growth.5gr-ci/minikube/vagrant/Vagrantfile:
+To tune RAM and CPU amount it is required to change correspondent value in the 5gr-ci/minikube/vagrant/Vagrantfile:
 
 For tuning RAM amount please find and change row:
 

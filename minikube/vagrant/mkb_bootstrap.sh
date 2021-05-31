@@ -45,7 +45,7 @@ do
 #&v
 sed -i "s&https://github.com/5growth/5gr-ci& -b $GIT_CI clone https://github.com/5growth/5gr-ci&g" $file
 done
-cd 5growth.5gr-ci/minikube/local
+cd 5gr-ci/minikube/local
 kubectl apply -f monitoring_platform.yaml
 kubectl apply -f so.yaml
 kubectl apply -f vs.yaml

@@ -38,14 +38,10 @@ spec:
             mountPath: /usr/local/apache2/htdocs
         ports:
         - containerPort: 80
-#      initContainers:
-#        - name: check-configpod
-#          image: subfuzion/netcat
-#          command: ["sh", "-c", "until wget -q http://repo-configs:8088; do echo waiting for repo-configs; sleep 1; done"]
       initContainers:
         - name: clone-failshare
-          image: cirrusci/wget
-          command: ["sh", "-c", "until wget -q http://repo-configs:8089; do echo waiting for repo-configs; sleep 1; done && wget -r http://repo-configs:8089/5growth.5gr-ci/containerization/fileshare/ && cp -rf repo-configs:8089/5growth.5gr-ci/containerization/fileshare/* /usr/local/apache2/htdocs"]
+          image: alpine/git
+          command: ["sh", "-c", "git clone https://github.com/5growth/5gr-ci && cp -rf 5gr-ci/containerization/fileshare/* /usr/local/apache2/htdocs"]
           volumeMounts:
             - name: fileshare-data
               mountPath: /usr/local/apache2/htdocs

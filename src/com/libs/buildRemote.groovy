@@ -24,10 +24,9 @@ remote.allowAnyHosts = true
     sshCommand remote: remote, command: "sudo docker rm -f \$(sudo docker ps -a | grep $cmpt_id | awk '{ print \$1}')  || true"
     sshCommand remote: remote, command: "mkdir -p -m 0777 $d_dir"
 
-    sh "git clone -b $ci_rep https://$u5g:$p5g@5growth.eu/git/5growth.5gr-ci repo"
     git(
        branch: "${params.ci_branch_mon}",
-       url: 'https://5growth.eu/git/5growth.5gr-ci',
+       url: 'https://github.com/5growth/5gr-ci/',
        credentialsId: '5gt-ci',
     )
     sh "mkdir -p repo"
@@ -40,7 +39,6 @@ remote.allowAnyHosts = true
 
     sshCommand remote: remote, command: "chmod -R +x /home/ubuntu/$d_dir || true"
 
-    sshCommand remote: remote, command: "sed -i 's/5growth.eu/$u5g:$p5g@5growth.eu/g' $d_dir/${cmpt_id}build_docker.sh"
     sshCommand remote: remote, command: "sed -i 's/GIT_BRANCH=.*/GIT_BRANCH=$git_rep/' $d_dir/${cmpt_id}build_docker.sh"
     sshCommand remote: remote, command: "chmod +x $d_dir/${cmpt_id}build_docker.sh"
 }}
