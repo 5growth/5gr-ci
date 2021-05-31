@@ -1,0 +1,26 @@
+{
+    "nst":  {
+            "nstId": "vCDN_v02",
+            "nstName": "5gr_entertainment_ns",
+            "nstVersion": "0.1",
+            "nstProvider": "NXW",
+            "nsdId": "vCDN_v02",
+            "nsdVersion": "0.3",
+            "nstServiceProfile": {
+
+                "eMBBPerfReq": [
+                    {
+                        "expDataRateDL": 10220,
+                        "expDataRateUL": 120,
+                        "areaTrafficCapDL": 10220,
+                        "areaTrafficCapUL": 210,
+                        "userDensity": 22,
+                        "activityFactor": 3220,
+                        "uESpeed": 3220,
+                        "coverage": "coverage1"
+                    }
+                ]
+            }
+        }
+
+}

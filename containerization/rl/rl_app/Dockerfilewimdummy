@@ -1,0 +1,15 @@
+FROM maven:3.5.4-jdk-8
+
+RUN apt-get update
+
+RUN mkdir -p /rl_WIM/swagger-client
+ADD ./rl_git/rl/dependencies /rl_WIM/dependencies
+WORKDIR /rl_WIM/dependencies/sbi-client
+RUN mvn clean install -Dmaven.test.skip=true -Dmaven.javadoc.skip=true
+
+ADD ./rl_git/rl/plugins/WIM/DummyWIMPlugin /rl_WIM
+WORKDIR /rl_WIM
+RUN mvn clean package -Dmaven.test.skip=true
+EXPOSE 53000
+WORKDIR /rl_WIM
+CMD java -jar target/DummyWIMPlugin-1.0.jar xml_domain/domaininfo.xml 0.0.0.0 53000

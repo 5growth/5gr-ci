@@ -1,0 +1,61 @@
+version: '3'
+services:
+  vs_app:
+    container_name: vs_app
+#    depends_on:
+#    - vs_postgres
+#    - vs_rabbitmq
+    build: 
+      context: .
+      dockerfile: vs_app/Dockerfile
+    image: vs_app:${TAG} # TAG should be environment variable
+    volumes:
+      - ./vs_app/application.properties:/vs/SEBASTIAN/SEBASTIAN_CORE/target/application.properties
+      - ./vs_git/SEBASTIAN_WEB_GUI:/www
+    ports:
+      - 5005:5005
+      - 8082:8082
+      - 80:80
+    command: >
+      /bin/bash -c "
+        while ! nc -z vs_postgres 5432;
+        do
+          echo sleeping;
+          sleep 1;
+        done;
+        echo Connected!;
+        /start.sh;
+      "
+
+  vs_postgres:
+    container_name: vs_postgres
+    build:
+      context: .
+      dockerfile: vs_postgres/Dockerfile
+    volumes:
+      - ./vs_postgres/datadir:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    image: vs_postgres:${TAG} # TAG should be environment variable
+    environment:
+      POSTGRES_PASSWORD: postgres
+
+  vs_rabbitmq:
+    container_name: vs_rabbitmq
+    ports:
+      - 5672:5672
+    image: rabbitmq:3
+
+  vs_file_share:
+    container_name: vs_file_share
+    volumes:
+      - ../fileshare:/usr/local/apache2/htdocs
+    ports:
+      - 81:80
+    image: httpd:2.4
+
+
+networks:
+  default:
+    external:
+      name: 5gt_nw

@@ -1,0 +1,66 @@
+{
+    "gateways": [
+        {
+            "gatewayAttributes": {
+                "geographicalLocationInfo": "Pisa",
+                "wimId": "3",
+                "networkConnectivityEndpoint": [
+                    {
+                        "netGwIpAddress": "10.7.1.20",
+                        "netGwInterfceId": null
+                    }
+                ],
+                "gatewayId": "10.7.1.20"
+            }
+        },
+        {
+            "gatewayAttributes": {
+                "geographicalLocationInfo": "Pisa",
+                "wimId": "3",
+                "networkConnectivityEndpoint": [
+                    {
+                        "netGwIpAddress": "10.7.2.20",
+                        "netGwInterfceId": null
+                    }
+                ],
+                "gatewayId": "10.7.2.20"
+            }
+        }
+    ],
+    "virtualLinks": [
+        {
+            "virtualLink": {
+                "virtualLinkId": "101",
+                "totalBandwidth": 1000000,
+                "availableBandwidth": 1000000,
+                "networkQoS": {
+                    "linkCostValue": 1,
+                    "linkDelayValue": 50,
+                    "packetLossRate": 0
+                },
+                "srcGwId": "10.7.1.12",
+                "srcLinkId": 10,
+                "dstGwId": "10.7.2.14",
+                "dstLinkId": 20,
+                "networkLayer": "vxlan"
+            }
+        },
+        {
+            "virtualLink": {
+                "virtualLinkId": "103",
+                "totalBandwidth": 1000000,
+                "availableBandwidth": 1000000,
+                "networkQoS": {
+                    "linkCostValue": 1,
+                    "linkDelayValue": 50,
+                    "packetLossRate": 0
+                },
+                "srcGwId": "10.7.2.14",
+                "srcLinkId": 20,
+                "dstGwId": "10.7.1.12",
+                "dstLinkId": 10,
+                "networkLayer": "vxlan"
+            }
+        }
+    ]
+}

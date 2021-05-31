@@ -1,0 +1,48 @@
+{
+    "vsBlueprint": {
+        "version": "1.0",
+        "name": "CDN",
+        "description": "Content Delivery Network",
+        "sliceServiceType": "EMBB",
+        "embbServiceCategory": "URBAN_MACRO",
+        "parameters": [
+            {
+                "parameterId": "users",
+                "parameterName": "users",
+                "parameterType": "number",
+                "parameterDescription": "number of CDN users",
+                "applicabilityField": "media"
+            }
+        ]
+    },
+    "translationRules": [
+        {
+            "nstId": "vCDN_v02",
+            "nsdId": "vCDN_v02",
+            "nsdVersion": "0.3",
+            "nsFlavourId": "df_vCDN",
+            "nsInstantiationLevelId": "il_vCDN_big",
+            "input": [
+                {
+                    "parameterId": "users",
+                    "minValue": 1001,
+                    "maxValue": 2500
+                }
+            ]
+        },
+        {
+            "nstId": "vCDN_v02",
+            "nsdId": "vCDN_v02",
+            "nsdVersion": "0.3",
+            "nsFlavourId": "df_vCDN",
+            "nsInstantiationLevelId": "il_vCDN_small",
+            "input": [
+                {
+                    "parameterId": "users",
+                    "minValue": 1,
+                    "maxValue": 1000
+                }
+            ]
+        }
+    ]
+}

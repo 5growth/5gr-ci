@@ -1,0 +1,16 @@
+FROM maven:3.5.4-jdk-8
+
+RUN apt-get update
+
+RUN mkdir -p /mtp_MEC/sbi-client
+ADD ./mtp_git/java-client-generated/sbi-client /mtp_MEC/sbi-client
+WORKDIR /mtp_MEC/sbi-client
+RUN mvn clean install -Dmaven.test.skip=true
+
+RUN mkdir -p /mtp_MEC
+ADD ./mtp_git/IFA005/plugins/MEC/MECdummy /mtp_MEC
+WORKDIR /mtp_MEC
+RUN mvn clean package -Dmaven.test.skip=true
+EXPOSE 54000
+WORKDIR /mtp_MEC
+CMD java -jar target/DummyMECPlugin-1.0.jar xml_domain/domaininfo.xml 0.0.0.0 54000

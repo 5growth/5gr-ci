@@ -1,0 +1,20 @@
+{
+    "vsd": {
+        "name": "VS_small",
+        "version": "0.2",
+        "sst": "URLLC",
+        "vsBlueprintId":"{{vs_vsb_id}}",
+        "managementType": "PROVIDER_MANAGED",
+        "qosParameters": {
+            "users": "50"
+        },
+        "serviceConstraints": [
+
+        ],
+        "sla": {
+
+        }
+    },
+    "tenantId": "{{tenant}}",
+    "isPublic": true
+}

@@ -1,0 +1,242 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vs-file-share
+  labels:
+    app: vs-file-share
+spec:
+  type: NodePort
+  ports:
+  - port: 81
+    targetPort: 80
+  selector:
+    app: vs-file-share
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vs-file-share-deployment
+spec:
+  selector:
+    matchLabels:
+      app: vs-file-share
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: vs-file-share
+    spec:
+      volumes:
+      - name: fileshare-data
+        emptyDir: {}
+      containers:
+      - name: vs-file-share
+        image: httpd:2.4
+        volumeMounts:
+          - name: fileshare-data
+            mountPath: /usr/local/apache2/htdocs
+        ports:
+        - containerPort: 80
+#      initContainers:
+#        - name: check-configpod
+#          image: subfuzion/netcat
+#          command: ["sh", "-c", "until wget -q http://repo-configs:8088; do echo waiting for repo-configs; sleep 1; done"]
+      initContainers:
+        - name: clone-failshare
+          image: cirrusci/wget
+          command: ["sh", "-c", "until wget -q http://repo-configs:8089; do echo waiting for repo-configs; sleep 1; done && wget -r http://repo-configs:8089/5growth.5gr-ci/containerization/fileshare/ && cp -rf repo-configs:8089/5growth.5gr-ci/containerization/fileshare/* /usr/local/apache2/htdocs"]
+          volumeMounts:
+            - name: fileshare-data
+              mountPath: /usr/local/apache2/htdocs
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vs-rabbitmq
+  labels:
+    app: vs-rabbit
+spec:
+  type: NodePort
+  ports:
+  - port: 5672
+  selector:
+    app: vs-rabbit
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vs-rabbit-deployment
+spec:
+  selector:
+    matchLabels:
+      app: vs-rabbit
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: vs-rabbit
+    spec:
+      containers:
+      - name: vs-rabbit
+        image: rabbitmq:3
+        ports:
+        - containerPort: 5672
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vs-postgres-properties
+data:
+  init.sql: |
+    CREATE DATABASE sebastian;
+    ALTER USER postgres PASSWORD 'postgres';
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vs-postgres
+  labels:
+    app: vs-postgres
+spec:
+  type: NodePort
+  ports:
+  - port: 5432
+  selector:
+    app: vs-postgres
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vs-postgres-deployment
+spec:
+  selector:
+    matchLabels:
+      app: vs-postgres
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: vs-postgres
+    spec:
+      volumes:
+      - name: vs-postgres-volume
+        configMap:
+          name: vs-postgres-properties
+      containers:
+      - name: vs-postgres
+        image: img:5000/vs_postgres:local
+        volumeMounts:
+          - name: vs-postgres-volume
+            mountPath: /docker-entrypoint-initdb.d/
+        env:
+        - name: POSTGRES_PASSWORD
+          value: "postgres"
+        ports:
+        - containerPort: 5432
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vs-app-properties
+data:
+  application.properties: |
+    spring.datasource.url= jdbc:postgresql://vs-postgres:5432/sebastian
+    spring.datasource.username=postgres
+    spring.datasource.password=postgres
+    
+    ##BINDING TOMCAT ON MANAGEMENT IP ADDRESS
+    #server.address=
+    server.port=8082
+    
+    spring.rabbitmq.host=vs-rabbitmq
+    
+    spring.jpa.hibernate.ddl-auto=create-drop
+    #spring.jpa.hibernate.ddl-auto = update
+    
+    # Available: BCRYPT - NOOP
+    security.passwordEncoder=BCRYPT
+    
+    sebastian.localTmpDir=/tmp
+    
+    sebastian.admin=admin
+    
+    #nfvo.type=TIMEO
+    #nfvo.type=OSM
+    #nfvo.type=DUMMY
+    #nfvo.type=SM
+    
+    
+    nfvo.address=so-app
+    nfvo.catalogue.type=SM
+    nfvo.lcm.type=SM
+    
+    nfvo.catalogue.address=so-app
+    nfvo.lcm.address=so-app
+    translator.type=BASIC
+    
+    arbitrator.type=BASIC
+    
+    #polling period for TIMEO NFVO operations in seconds
+    sebastian.nfvo.timeo.polling=20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vs-app
+  labels:
+    app: vs-app
+spec:
+#  type: NodePort
+  clusterIP: None
+  ports:
+  - port: 5005
+    protocol: TCP
+    name: placeholder1
+  - port: 8082
+    protocol: TCP
+    name: placeholder2
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: placeholder3
+  selector:
+    app: vs-app
+---
+apiVersion: apps/v1
+#kind: Deployment
+kind: StatefulSet
+metadata:
+  name: vs-app-deployment
+spec:
+  serviceName: vs-app
+  selector:
+    matchLabels:
+      app: vs-app
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: vs-app
+    spec:
+      volumes:
+      - name: app-properties
+        configMap:
+          name: vs-app-properties
+      containers:
+      - name: vs-app
+        image: img:5000/vs_app:local
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+          - name: app-properties
+            mountPath: /vs/SEBASTIAN/SEBASTIAN_CORE/target/temp
+        command: ["sh", "-c", "cp -f /vs/SEBASTIAN/SEBASTIAN_CORE/target/temp/application.properties /vs/SEBASTIAN/SEBASTIAN_CORE/target && /start.sh"]
+        ports:
+        - containerPort: 5005
+        - containerPort: 8082
+        - containerPort: 80
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox:latest
+          command: ["sh", "-c", "until nc -z vs-postgres.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local 5432; do echo waiting for postgres; sleep 1; done"]
+

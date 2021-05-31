@@ -1,0 +1,39 @@
+FROM python:3.6-alpine
+
+#### All this just to build OSMClient
+RUN apk update
+RUN apk add curl-dev
+RUN apk add gcc
+RUN apk add yaml
+RUN apk add libmagic
+RUN apk add musl-dev
+RUN pip install pycurl
+RUN pip install PyYAML
+RUN apk add --no-cache bash
+RUN apk add librdkafka-dev python3-dev
+
+RUN mkdir -p /usr/src/app/5Gr-SO
+
+COPY so_git/5Gr-SO /usr/src/app/5Gr-SO
+COPY so_app/start.sh /usr/src/app/5Gr-SO/nbi/python-flask-server/start.sh
+
+WORKDIR /usr/src/app/5Gr-SO/coreMano/osmclient/
+
+RUN python3 setup.py install
+
+WORKDIR /usr/src/app/5Gr-SO
+RUN pip3 install --no-cache-dir -r requirements.txt
+
+WORKDIR /usr/src/app/5Gr-SO/nbi/python-flask-server
+RUN pip3 install --no-cache-dir -r requirements.txt
+
+#RUN sed -i 's/db.ip.*/db.ip=so_mongo/g' /usr/src/app/5Gr-SO/db/db.properties
+
+ENV PYTHONPATH "${PYTHONPATH}:/usr/src/app/5Gr-SO:/usr/src/app/5Gr-SO/sm:/usr/src/app/5Gr-SO/nbi:/usr/src/app/5Gr-SO/db:/usr/src/app/5Gr-SO/coreMano:/usr/src/app/5Gr-SO/log:/usr/src/app/5Gr-SO/nbi/python-flask-server"
+
+EXPOSE 8080
+EXPOSE 8085
+
+ENTRYPOINT ["python3"]
+
+CMD ["-m", "swagger_server"]

@@ -1,0 +1,220 @@
+version: '3.2'
+services:
+  mon_platform:
+    container_name: mon_platform
+    ports:
+      - 8989:8989
+    volumes:
+    - ./mon_app/mon-core/alertmanager/alertmanager.yml:/mon/mon-core/alertmanager/alertmanager.yml
+    - ./mon_app/mon-core/prometheus/alert.rules:/mon/mon-core/prometheus/alert.rules
+    - ./mon_app/mon-core/prometheus/calculate.rules:/mon/mon-core/prometheus/calculate.rules
+    - ./mon_app/mon-core/prometheus/prometheus.yml:/mon/mon-core/prometheus/prometheus.yml
+    - ./logstash/pipeline/logstash.conf:/mon/mon-core/logstash/logstash.conf
+    - ./mon_app/config.properties:/mon/config-manager-nxw/config.properties
+    - ./mon_git/fileserver:/mon/config-manager-nxw/target/fileserver
+#    - ./mon_app/exporters.json:/mon/config-manager-nxw/target/exporters.json
+#    - ./mon_app/log4j.properties:/mon/config-manager-nxw/target/log4j.properties
+#    - ./mon_app/dashboard-templates:/mon/config-manager-nxw/target/dashboard-templates
+#    - ./mon_app/exporter_templates:/mon/config-manager-nxw//target/exporter_templates
+#    - ./mon_app/script:/mon/config-manager-nxw/target/script
+    build:
+      context: .
+      dockerfile: mon_app/Dockerfile
+    depends_on:
+      - mon_grafana
+    image: mon_platform:${TAG} # TAG should be environment variable
+    command: ./configure_grafana.sh mon_grafana
+
+  mon_grafana:
+    container_name: mon_grafana
+    ports:
+      - 3000:3000
+    volumes:
+    - ./mon_grafana/grafana.ini:/etc/grafana/grafana.ini
+    - ./mon_grafana/datasource.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
+    image: grafana/grafana
+
+  mon_prometheus:
+    container_name: mon_prometheus
+    volumes:
+      - ./mon_app/mon-core/prometheus/alert.rules:/etc/prometheus/alert.rules
+      - ./mon_app/mon-core/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - 9090:9090
+    image: prom/prometheus
+#    command: "--help"
+    command: "--config.file=/etc/prometheus/prometheus.yml --web.enable-lifecycle"
+
+  mon_alertmanager:
+    container_name: mon_alertmanager
+    volumes:
+    - ./mon_app/mon-core/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    ports:
+      - 9093:9093
+    image: prom/alertmanager
+
+#  elasticsearch:
+#    build:
+#      context: elasticsearch/
+#      args:
+#        ELK_VERSION: $ELK_VERSION
+#    container_name: elasticsearch
+#    volumes:
+#      - type: bind
+#        source: ./elasticsearch/config/elasticsearch.yml
+#        target: /usr/share/elasticsearch/config/elasticsearch.yml
+#        read_only: true
+#      - type: volume
+#        source: elasticsearch
+#        target: /usr/share/elasticsearch/data
+#    ports:
+#      - "9200:9200"
+#      - "9300:9300"
+#    environment:
+#      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+#      ELASTIC_PASSWORD: changeme
+#    networks:
+#      elastic-kibana:
+#        ipv4_address: 192.168.1.10
+#      logstash-elastic:
+#        ipv4_address: 192.168.2.10
+
+#  logstash:
+#    build:
+#      context: logstash/
+#      args:
+#        ELK_VERSION: $ELK_VERSION
+#    container_name: logstash
+#    volumes:
+#      - type: bind
+#        source: ./logstash/config/logstash.yml
+#        target: /usr/share/logstash/config/logstash.yml
+#        read_only: true
+#      - type: bind
+#        source: ./logstash/pipeline
+#        target: /usr/share/logstash/pipeline
+#        read_only: true
+#    ports:
+#      - "5000:5000"
+#      - "9600:9600"
+#    environment:
+#      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+#    networks:
+#      logstash-elastic:
+#        ipv4_address: 192.168.2.20
+#      kafka-logstash:
+#        ipv4_address: 192.168.3.20
+#    depends_on:
+#      - elasticsearch
+#
+#  kibana:
+#    build:
+#      context: kibana/
+#      args:
+#        ELK_VERSION: $ELK_VERSION
+#    container_name: kibana
+#    volumes:
+#      - type: bind
+#        source: ./kibana/config/kibana.yml
+#        target: /usr/share/kibana/config/kibana.yml
+#        read_only: true
+#    ports:
+#      - "5601:5601"
+#    networks:
+#      elastic-kibana:
+#        ipv4_address: 192.168.1.20
+#    depends_on:
+#      - elasticsearch
+#
+#  zookeeper:
+#    image: zookeeper
+#    container_name: zookeeper
+#    tty: true
+#    ports:
+#     - "2181:2181"
+#    networks:
+#      kafka-zookeeper:
+#        ipv4_address: 192.168.4.20
+#
+#  kafka:
+#    image: wurstmeister/kafka
+#    container_name: kafka
+#    tty: true
+#    ports:
+#     - "9092:9092"
+#    networks:
+#      kafka-logstash:
+#        ipv4_address: 192.168.3.10
+#      kafka-zookeeper:
+#        ipv4_address: 192.168.4.10
+#    environment:
+#      KAFKA_ADVERTISED_HOST_NAME: 10.9.8.225
+#      KAFKA_ADVERTISED_PORT: 9092
+#      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+#      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+#      #KAFKA_HEAP_OPTS: "-Xmx4G -Xms4G"
+
+#networks:
+#  elastic-kibana:
+#    driver: bridge
+#    ipam:
+#      config:
+#        - subnet: 192.168.1.0/24
+#  logstash-elastic:
+#    driver: bridge
+#    ipam:
+#      config:
+#        - subnet: 192.168.2.0/24
+#  kafka-logstash:
+#    driver: bridge
+#    ipam:
+#      config:
+#        - subnet: 192.168.3.0/24
+#  kafka-zookeeper:
+#    driver: bridge
+#    ipam:
+#      config:
+#        - subnet: 192.168.4.0/24
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:5.4.0
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  broker:
+    image: confluentinc/cp-server:5.4.0
+    hostname: broker
+    container_name: broker
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://10.5.1.187:9092
+      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: broker:29092
+      CONFLUENT_METRICS_REPORTER_ZOOKEEPER_CONNECT: zookeeper:2181
+      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
+      CONFLUENT_METRICS_ENABLE: 'true'
+      CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
+
+
+networks:
+  default:
+    external:
+      name: 5gt_nw
+
+#volumes:
+#  elasticsearch:
+#

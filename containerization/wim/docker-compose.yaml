@@ -1,0 +1,21 @@
+version: '3'
+services:
+  onos:
+    container_name: onos
+#    build:
+#      context: .
+#      dockerfile: onos/Dockerfile
+    image: onosproject/onos:2.1.0
+#    volumes:
+#      - ./onos/add_app.sh /optadd_app.sh
+    ports:
+      - 6653:6653
+      - 6640:6640
+      - 8181:8181
+      - 8101:8101
+      - 9876:9876
+
+networks:
+  default:
+    external:
+      name: 5gt_nw

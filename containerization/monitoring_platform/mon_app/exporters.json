@@ -1,0 +1,19 @@
+{
+  "node_exporter": [
+      {"key":"port",
+        "value": 9100},
+      {"key": "install_template",
+        "value": "node_exporter.template"},
+      {"key": "uninstall_template",
+        "value": "node_exporter_uninstall.template"}
+      ],
+  "onewaylatency_exporter": [
+    {"key":"port",
+      "value": 15000},
+    {"key": "install_template",
+      "value": "onewaylatency_exporter.template"},
+    {"key": "uninstall_template",
+      "value": "onewaylatency_exporter_uninstall.template"}
+  ]
+
+}

@@ -1,0 +1,143 @@
+version: '3'
+services:
+  rl_mysql:
+    container_name: rl_mysql
+    image: mysql:5.7
+    command: --lower-case-table-names=1
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+
+    volumes:
+#      - ./rl_git/rl/dbscripts:/dbscripts
+      - ./rl_git/rl/rl/dbscripts/utility/create_mtp_user.sql:/docker-entrypoint-initdb.d/1_create_rl_user.sql
+      - ./rl_git/rl/rl/dbscripts/mtpscheme.sql:/docker-entrypoint-initdb.d/2_rlscheme.sql
+      - ./rl_app/mysqld.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf
+
+
+  rlvim1:
+    build:
+      context: .
+      dockerfile: rl_app/Dockerfilevimdummy
+    image: "rlvim:${TAG}"
+    container_name: rlvim1
+#    volumes:
+#      - ./rl_app/xml_domain/domaininfoVIM1.xml:/rl_VIM/xml_domain/domaininfoVIM1.xml
+    ports:
+      - "51000:51000"
+    command: /bin/bash -c "java -jar target/DummyVIMPlugin-1.0.jar xml_domain/domaininfoVIM1.xml 0.0.0.0 51000;"
+    stdin_open: true
+    tty: true
+
+  rlvim2:
+    build:
+      context: .
+      dockerfile: rl_app/Dockerfilevimdummy
+    image: "rlvim:${TAG}"
+    container_name: rlvim2
+#    volumes:
+#      - ./rl_app/xml_domain/domaininfoVIM2.xml:/mtp_VIM/xml_domain/domaininfoVIM2.xml
+    ports:
+      - "52000:51000"
+    command: /bin/bash -c "java -jar target/DummyVIMPlugin-1.0.jar xml_domain/domaininfoVIM2.xml 0.0.0.0 51000;"
+    stdin_open: true
+    tty: true
+
+  rlwim:
+    build:
+      context: .
+      dockerfile: rl_app/Dockerfilewimdummy
+    image: "mtpwim:${TAG}"
+    container_name: rlwim
+    volumes:
+      - ./rl_app/xml_domain/domaininfo_WIM.xml:/rl_WIM/xml_domain/domaininfo.xml
+    ports:
+      - "53000:53000"
+    command: /bin/bash -c "java -jar target/DummyWIMPlugin-1.0.jar xml_domain/domaininfo.xml 0.0.0.0 53000;"
+    stdin_open: true
+    tty: true
+#
+#  mtpmec:
+#    build:
+#      context: .
+#      dockerfile: rl_app/Dockerfilemecdummy
+#    image: "mtpmec:${TAG}"
+#    container_name: mtpmec
+#    ports:
+#      - "54000:54000"
+#    command: /bin/bash -c "java -jar target/DummyMECPlugin-1.0.jar xml_domain/domaininfo.xml 0.0.0.0 54000;"
+#    stdin_open: true
+#    tty: true
+#
+#
+#
+  rlapp:
+    build:
+      context: .
+      dockerfile: rl_app/Dockerfilerl
+    image: "rl_app:${TAG}"
+    container_name: rlapp
+    volumes:
+      - ./rl_app/application.properties:/rl/rl/target/application.properties
+      - ./rl_app/xml_domain/domainlist_rl.xml:/rl/rl/xml_domain/domainlist_rl.xml
+#      - ./rl_app/xml_domain/federatedResources.xml:/rl/rl/xml_domain/federatedResources.xml
+      - ./rl_app/interdomainlinks.sql:/rl/rl/dbscripts/topology/interdomainlinks.sql
+#      - ./rl_app/fed_interdomainlinks.sql:/rl/rl/dbscripts/topology/fed_interdomainlinks.sql
+    ports:
+      - "50000:50000"
+    links:
+      - rl_mysql
+    depends_on:
+      - rl_mysql
+      - rlvim1
+      - rlvim2
+      - rlwim
+    command: >
+      /bin/bash -c "
+        while ! nc -z rl_mysql 3306;
+        do
+          echo sleeping;
+          sleep 1;
+        done;
+        echo Connected!;
+        java -DSTUB_ENABLE=no -jar ../target/rl-1.0.jar ../xml_domain/domainlist_rl.xml 0.0.0.0 50000;
+      "
+    stdin_open: true
+    tty: true
+
+  mtpopenstackplugin1:
+    build:
+      context: .
+      dockerfile: rl_openstack_plugin/Dockerfile
+    image: "rl_openstack_plugin:${TAG}"
+    container_name: mtpopenstackplugin1
+    volumes:
+    - ./rl_openstack_plugin/config1.conf:/usr/src/vim-manager/config.conf
+    ports:
+      - "8001:8001"
+    extra_hosts:
+    - "ctl01:10.5.1.95"
+    - "controller:10.5.1.49"
+    command: /bin/bash -c "vim-manager --config-file config.conf run"
+
+  mtpopenstackplugin2:
+    build:
+      context: .
+      dockerfile: rl_openstack_plugin/Dockerfile
+    image: "rl_openstack_plugin:${TAG}"
+    container_name: mtpopenstackplugin2
+    volumes:
+    - ./rl_openstack_plugin/config2.conf:/usr/src/vim-manager/config.conf
+    ports:
+      - "8002:8001"
+    extra_hosts:
+    - "ctl01:10.5.1.95"
+    - "controller:10.5.1.49"
+    command: /bin/bash -c "vim-manager --config-file config.conf run"
+
+networks:
+  default:
+    external:
+      name: 5gt_nw
+

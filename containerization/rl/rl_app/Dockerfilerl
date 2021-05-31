@@ -1,0 +1,18 @@
+FROM maven:3.5.4-jdk-8
+
+RUN apt-get update
+RUN apt-get install -y netcat
+RUN mkdir -p /rl/rl
+ADD ./rl_git/rl/rl /rl/rl
+ADD ./rl_git/rl/dependencies /rl/dependencies
+WORKDIR /rl/dependencies/sbi-client
+RUN mvn clean install -Dmaven.test.skip=true -Dmaven.javadoc.skip=true
+WORKDIR /rl/dependencies/pa-client
+RUN mvn clean install -Dmaven.test.skip=true -Dmaven.javadoc.skip=true
+WORKDIR /rl/dependencies/mon-client
+RUN mvn clean install -Dmaven.test.skip=true -Dmaven.javadoc.skip=true
+WORKDIR /rl/rl
+RUN mvn clean package -Dmaven.test.skip=true
+EXPOSE 50000
+WORKDIR /rl/rl/src
+CMD java -DSTUB_ENABLE=no -jar ../target/rl-R1.0.jar ../xml_domain/domainlist.xml 0.0.0.0 50000

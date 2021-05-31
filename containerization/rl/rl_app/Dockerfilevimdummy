@@ -1,0 +1,15 @@
+FROM maven:3.5.4-jdk-8
+
+RUN apt-get update
+
+RUN mkdir -p /rl_VIM/swagger-client
+ADD ./rl_git/rl/dependencies /rl_VIM/dependencies
+WORKDIR /rl_VIM/dependencies/sbi-client
+RUN mvn clean install -Dmaven.test.skip=true -Dmaven.javadoc.skip=true
+
+ADD ./rl_git/rl/plugins/VIM/DummyVIMPlugin /rl_VIM
+WORKDIR /rl_VIM
+RUN mvn clean package -Dmaven.test.skip=true
+EXPOSE 51000
+WORKDIR /rl_VIM
+CMD java -jar target/DummyVIMPlugin-1.0.jar xml_domain/domaininfoVIM1.xml 0.0.0.0 51000

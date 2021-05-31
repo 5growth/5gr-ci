@@ -1,0 +1,48 @@
+version: '3'
+services:
+  so_app:
+    container_name: so_app
+    volumes:
+      - ./so_app/config/coreMano.properties:/usr/src/app/5Gr-SO/coreMano/coreMano.properties
+      - ./so_app/config/db.properties:/usr/src/app/5Gr-SO/db/db.properties
+      - ./so_app/config/mtp.properties:/usr/src/app/5Gr-SO/mtp.properties
+      - ./so_app/config/rooe.properties:/usr/src/app/5Gr-SO/sm/rooe/rooe.properties
+      - ./so_app/config/vim.properties:/usr/src/app/5Gr-SO/coreMano/vim.properties
+      - ./so_app/config/monitoring.properties:/usr/src/app/5Gr-SO/monitoring/monitoring.properties
+      - ./so_app/config/vs.properties:/usr/src/app/5Gr-SO/sm/soe/vs.properties
+      - ./so_app/config/federation.properties:/usr/src/app/5Gr-SO/sm/soe/federation.properties
+      - ./so_app/start.sh:/usr/src/app/5Gr-SO/nbi/python-flask-server/start.sh
+      - ./so_app/config/test:/usr/src/app/5Gr-SO/test
+      - ./so_app/config/descriptors:/usr/src/app/5Gr-SO/descriptors
+    build:
+      context: .
+      dockerfile: so_app/Dockerfile
+    image: so_app:${TAG}
+    ports:
+      - "8080:8080"
+      - "8085:8085"
+    entrypoint: ""
+    command: >
+      bash -c "chmod +x start.sh && ./start.sh"
+
+  so_pa_generic:
+    container_name: so_pa_generic
+    volumes:
+      - ./pa_generic/settings.conf:/PA/settings.conf
+    build:
+      context: .
+      dockerfile: pa_generic/Dockerfile
+    image: pa_generic:${TAG}
+    ports:
+      - "6161:6161"
+
+  so_mongo:
+    container_name: so_mongo
+    image: "mongo:3.6"
+    ports:
+      - "27017:27017"
+
+networks:
+  default:
+    external:
+      name: 5gt_nw
