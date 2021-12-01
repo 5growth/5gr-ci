@@ -1,0 +1,103 @@
+- name: VM img provisioning
+  hosts: img
+  become: yes
+  become_user: root
+  tasks:
+
+    - name: Run a build script (vs)
+      shell: bash -lc "cd /home/vagrant/5growth.5gr-ci/containerization/vertical_slicer/ && ./vs_build_docker.sh"
+      args:
+        chdir: "/home/vagrant/5growth.5gr-ci/containerization/vertical_slicer/"
+      tags:
+        - build
+        - vs
+
+    - name: Stop docker-compose services (vs)
+      community.docker.docker_compose:
+        project_src: /home/vagrant/5growth.5gr-ci/containerization/vertical_slicer
+        state: absent
+      tags:
+        - git
+        - gitvs
+        - vs
+
+    - name: Read-write git checkout from github (so)
+      git:
+        repo: https://github.com/5growth/5gr-so
+        dest: /home/vagrant/5growth.5gr-ci/containerization/so/so_git
+        version: master
+      tags:
+        - git
+        - gitso
+        - so
+
+    - name: Run docker-compose up services (so)
+      community.docker.docker_compose:
+        project_src: /home/vagrant/5growth.5gr-ci/containerization/so
+        build: yes
+      tags:
+        - soup
+        - so
+
+    - name: Stop docker-compose up services (so)
+      community.docker.docker_compose:
+        project_src: /home/vagrant/5growth.5gr-ci/containerization/so
+        state: absent
+      tags:
+        - git
+        - gitso
+        - so
+
+    - name: Read-write git checkout from github (mon)
+      git:
+        repo: https://github.com/5growth/5gr-mon
+        dest: /home/vagrant/5growth.5gr-ci/containerization/monitoring_platform/mon_git
+        version: master
+      tags:
+        - git
+        - gitmon
+        - mon
+
+    - name: Run docker-compose up services (mon)
+      community.docker.docker_compose:
+        project_src: /home/vagrant/5growth.5gr-ci/containerization/monitoring_platform
+        build: yes
+      tags:
+        - monup
+        - mon
+
+    - name: Stop docker-compose up services (mon)
+      community.docker.docker_compose:
+        project_src: /home/vagrant/5growth.5gr-ci/containerization/monitoring_platform
+        state: absent
+      tags:
+        - git
+        - gitmon
+        - mon
+
+    - name: Read-write git checkout from github (rl)
+      git:
+        repo: https://github.com/5growth/5gr-rl
+        dest: /home/vagrant/5growth.5gr-ci/containerization/rl/rl_git
+        version: work_version
+      tags:
+        - git
+        - gitrl
+        - rl
+
+    - name: Run docker-compose up services (rl)
+      community.docker.docker_compose:
+        project_src: /home/vagrant/5growth.5gr-ci/containerization/rl
+        build: yes
+      tags:
+        - rlup
+        - rl
+
+    - name: Stop docker-compose up services (rl)
+      community.docker.docker_compose:
+        project_src: /home/vagrant/5growth.5gr-ci/containerization/rl
+        state: absent
+      tags:
+        - git
+        - gitrl
+        - rl

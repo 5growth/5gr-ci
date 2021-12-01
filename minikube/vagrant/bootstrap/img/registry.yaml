@@ -1,0 +1,24 @@
+- name: VM img provisioning
+  hosts: img
+  become: yes
+  become_user: root
+  tasks:
+    - name: Create Docker Registry directory
+      file:
+        path: /mnt/registry
+        state: "directory"
+        owner: "vagrant"
+        group: "vagrant"
+        mode: "0777"
+
+    - name: Start a registry
+      community.docker.docker_container:
+        name: registry
+        image: registry:2
+        state: started
+        restart: yes
+        detach: yes
+        volumes:
+          - "/mnt/registry:/var/lib/registry"
+        ports:
+         - "5000:5000"

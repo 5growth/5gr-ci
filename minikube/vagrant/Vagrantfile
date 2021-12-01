@@ -1,14 +1,5 @@
 boxes = [
 {
-    :name => "img",
-    :ip => "10.168.123.11",
-    :ip2 => "10.1.2.3",
-    :ssh_port => "2203",
-    :bootstrap => "img_bootstrap.sh",
-    :memory => "5120",
-    :cpus => "4"
-},
-{
     :name => "devstack",
     :ip => "10.168.123.10",
     :ip2 => "10.1.2.3",
@@ -35,20 +26,18 @@ boxes.each do |opts|
   if Vagrant.has_plugin?("vagrant-vbguest")
     config.vbguest.auto_update = false  
 end
-
   config.vm.define opts[:name] do |config|
     config.vm.hostname = opts[:name]
     config.vm.network :private_network, ip: opts[:ip]
     config.vm.network :private_network, ip: opts[:ip2], auto_config: false
-#    config.vm.network :forwarded_port, guest: 22, guest_ip: opts[:ip], host: opts[:ssh_port], id: 'ssh'
     config.vm.provision "shell", inline: <<-SHELL
       sed -i "/127.0.1.1/d" /etc/hosts
       echo "10.168.123.9 minikube" >> /etc/hosts
       echo "10.168.123.10 devstack" >> /etc/hosts
-     echo "10.168.123.11 img" >> /etc/hosts
+      echo "10.168.123.11 img" >> /etc/hosts
     SHELL
     config.vm.provision "shell", inline: 'ip l set eth2 up; ip a flush eth2; dhclient eth2; ip r del default via 10.0.2.2 dev eth0'
-    config.vm.provision "shell", path: opts[:bootstrap], keep_color: true
+#   config.vm.synced_folder "./", "/home/vagrant/sync"
    config.vm.provider "virtualbox" do |vb|
      vb.gui = false
      vb.memory = opts[:memory]
@@ -57,4 +46,37 @@ end
     end
   end
 end
+
+  config.vm.box = "generic/ubuntu1804"
+  config.vm.define "img" do |config|
+    config.vm.hostname = "img"
+    config.vm.network :private_network, ip: "10.168.123.11", auto_config: false
+    config.vm.network :private_network, ip: "10.1.2.3", auto_config: false
+    config.vm.provision "shell", inline: <<-SHELL
+      sed -i "/127.0.1.1/d" /etc/hosts
+      echo "10.168.123.10 devstack" >> /etc/hosts
+      echo "10.168.123.11 img" >> /etc/hosts
+    SHELL
+    config.vm.provision "shell", inline: 'sudo ip l set eth2 up; ip a flush eth2; sudo dhclient eth2; ip r del default via 10.0.2.2 dev eth0'
+    config.vm.provision :ansible_local do |ansible|
+      ansible.install_mode   = ":pip"
+      ansible.provisioning_path = "/home/vagrant/sync/"
+      ansible.playbook       = "/home/vagrant/sync/playbook.yaml"
+      ansible.inventory_path = "/home/vagrant/sync/ansible/inventory"
+      ansible.config_file    = "/home/vagrant/sync/ansible.cfg"
+      ansible.config_file    = "/home/vagrant/sync/ansible/ansible.cfg"
+      ansible.galaxy_roles_path = "ansible/"
+      ansible.galaxy_role_file = "requirements.yaml"
+      ansible.galaxy_command = "sudo ansible-galaxy collection install -r %{role_file} --force && sudo ansible-galaxy role install -r %{role_file} --force"
+      ansible.limit          = "all"
+      ansible.verbose        = true
+      end
+   config.vm.synced_folder "./", "/home/vagrant/sync"
+   config.vm.provider "virtualbox" do |vb|
+     vb.gui = false
+     vb.memory = 1500
+     vb.cpus = 2
+     vb.customize ["modifyvm", :id, "--nic3", "natnetwork", "--nat-network3", "5gnat"]
+    end
+  end
 end

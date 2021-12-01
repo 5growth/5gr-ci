@@ -1,0 +1,115 @@
+- name: VM docker installation
+  hosts: docker_hosts
+  become: yes
+  become_user: root
+  serial: 2
+  tasks:
+    - name: Install docker required system packages
+      apt: name={{ item }} state=latest update_cache=yes
+      loop: [ 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'python-pip',
+'python3-pip', 'virtualenv', 'python3-setuptools', 'gnupg2', 'conntrack']
+
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb [arch=amd64]  https://download.docker.com/linux/ubuntu bionic stable
+        state: present
+
+    - name: Update apt and install docker-ce
+      apt: update_cache=yes name=docker-ce state=latest
+
+    - name: Upgrade pip, setuptools, twine
+      pip:
+        name:
+          - pip
+          - setuptools
+          - twine
+        state: latest
+        executable: pip2 #.7
+      tags:
+      - pips
+
+    - name: Install keyring openshift
+      pip:
+        name:
+          - keyring
+          - openshift
+          - ipaddr
+          - netaddr
+        state: latest
+        executable: pip2 #.7
+      tags:
+      - pips
+
+    - name: Install Docker Module for Python
+      pip:
+        name:
+          - docker
+          - docker-compose
+          - kubernetes-validate
+          - openstacksdk
+        state: latest
+        executable: pip2 #.7
+      tags:
+        - pips
+
+    - name: Install Docker Module for Python
+      pip:
+        name:
+        - pip
+        - setuptools
+        - twine
+        executable: pip3
+      tags:
+        - pips
+
+    - name: Install Docker Module for Python
+      pip:
+        name:
+        - keyring
+        - openshift
+        - docker-compose
+        - kubernetes-validate
+        executable: pip3
+      tags:
+        - pips
+    - name: Upgrade all apt packages
+      apt: upgrade=dist force_apt_get=yes
+
+    - name: Add insecure regestry option
+      copy:
+        content: '{  "insecure-registries" : ["img:5000"]}'
+        dest: /etc/docker/daemon.json
+        owner: "root"
+        group: "root"
+        mode: 0644
+
+    - name: Ensure Docker is started and enabled at boot.
+      service:
+        name: docker
+        state: restarted
+        #enabled: "{{ docker_service_enabled }}"
+
+    - name: Install Docker Compose (if configured).
+      get_url:
+        url: https://github.com/docker/compose/releases/download/1.26.0/docker-compose-Linux-x86_64
+        dest: /usr/local/bin/docker-compose
+        mode: 0755
+      tags:
+        - url
+        - urlcompose
+
+    - name: Read-write git checkout from github #first?
+      git:
+        repo: https://github.com/5growth/5gr-ci
+        dest: /home/vagrant/5growth.5gr-ci
+        version: CDN_SSSA
+        clone: yes
+        update: yes
+      tags:
+        - git
+        - gitci

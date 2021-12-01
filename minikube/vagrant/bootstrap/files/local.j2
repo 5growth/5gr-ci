@@ -1,0 +1,48 @@
+[[local|localrc]]
+RECLONE=yes
+IP_VERSION=4
+HOST_IP="{{ hostvars['devstack']['ansible_default_ipv4']['address'] }}"
+
+#PUBLIC_INTERFACE="{{ hostvars['devstack']['ansible_default_ipv4']['alias'] }}"
+PUBLIC_INTERFACE=eth2
+#"{{ hostvars['devstack']['ansible_default_ipv4']['alias'] }}"
+
+ADMIN_PASSWORD=admin
+DATABASE_PASSWORD=$ADMIN_PASSWORD
+RABBIT_PASSWORD=$ADMIN_PASSWORD
+SERVICE_PASSWORD=$ADMIN_PASSWORD
+
+LIBVIRT_TYPE=kvm     # KVM
+
+## Neutron options
+Q_USE_PROVIDERNET_FOR_PUBLIC=True
+OVS_PHYSICAL_BRIDGE=br-ex
+PUBLIC_BRIDGE=br-ex
+OVS_BRIDGE_MAPPINGS=public:br-ex
+#Q_USE_PROVIDER_NETWORKING=True
+
+## Neutron Networking options used to create Neutron Subnets
+#IPV4_ADDRS_SAFE_TO_USE="${myrngnat}"
+#NETWORK_GATEWAY=${mygtw}
+#PROVIDER_SUBNET_NAME="provider_net"
+#PROVIDER_NETWORK_TYPE="flat"
+#USE_SUBNETPOOL=False      # external DHCP
+
+#IPV4_ADDRS_SAFE_TO_USE="10.150.0.0/24"
+#FIXED_RANGE=10.150.0.0/24
+#SUBNETPOOL_PREFIX_V4="10.150.0.0/24"
+#NETWORK_GATEWAY=10.150.0.1
+
+FLOATING_RANGE="{{ ansible_default_ipv4.address }}/{{ (ansible_default_ipv4.address + '/' + ansible_default_ipv4.netmask) | ipaddr('prefix') }}"
+PUBLIC_NETWORK_GATEWAY="{{ hostvars['devstack']['ansible_default_ipv4']['gateway'] }}"
+Q_FLOATING_ALLOCATION_POOL=start=10.11.2.100,end=10.11.2.200
+
+#logging
+LOGFILE=/opt/stack/devstack/logs/stack.sh.log
+LOGDAYS=1
+LOG_COLOR=True
+
+DOWNLOAD_DEFAULT_IMAGES=False
+IMAGE_URLS="https://cloud-images.ubuntu.com/bionic/current/bionic-server-cloudimg-amd64.img,"
+IMAGE_URLS+="http://download.cirros-cloud.net/0.5.1/cirros-0.5.1-x86_64-disk.img,"
+#IMAGE_URLS+="https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64-disk1.img,"

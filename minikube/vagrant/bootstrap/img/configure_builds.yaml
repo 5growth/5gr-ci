@@ -1,0 +1,117 @@
+- name: VM img provisioning
+  hosts: img
+  become: yes
+  become_user: root
+  tasks:
+
+    - name: Replace URL with creds (mon)
+      replace:
+        path: /home/vagrant/5growth.5gr-ci/containerization/monitoring_platform/mon_build_docker.sh
+        regexp: 'PROJECT_GIT="https://5growth.eu/git/5growth.5gr-mon"'
+        replace: 'PROJECT_GIT="https://github.com/5growth/5gt-mon"'
+        backup: yes
+    - name: Replace URL with creds (so)
+      ansible.builtin.replace:
+        path: /home/vagrant/5growth.5gr-ci/containerization/so/so_build_docker.sh
+        regexp: 'PROJECT_GIT="https://5growth.eu/git/5growth.5gr-so"'
+        replace: 'PROJECT_GIT="https://github.com/5growth/5gr-so"'
+        backup: yes
+# No need for raplacement for the VS
+
+    - name: Replace URL with creds (rl)
+      ansible.builtin.replace:
+        path: /home/vagrant/5growth.5gr-ci/containerization/rl/rl_build_docker.sh
+        regexp: 'PROJECT_GIT="https://5growth.eu/git/5growth.5gr-rl"'
+        replace: 'PROJECT_GIT="https://github.com/5growth/5gr-rl"'
+        backup: yes
+
+    - name: Replace compose with build (mon)
+      replace:
+        path: /home/vagrant/5growth.5gr-ci/containerization/monitoring_platform/mon_build_docker.sh
+        regexp: 'sudo docker-compose.*'
+        replace: 'sudo docker-compose build'
+        backup: yes
+    - name: Replace compose with build (so)
+      ansible.builtin.replace:
+        path: /home/vagrant/5growth.5gr-ci/containerization/so/so_build_docker.sh
+        regexp: 'sudo docker-compose.*'
+        replace: 'sudo docker-compose build'
+        backup: yes
+    - name: Replace compose with build (vs)
+      ansible.builtin.replace:
+        path: /home/vagrant/5growth.5gr-ci/containerization/vertical_slicer/vs_build_docker.sh
+        regexp: 'sudo docker-compose.*'
+        replace: 'sudo docker-compose build'
+        backup: yes
+    - name: Replace compose with build (rl)
+      ansible.builtin.replace:
+        path: /home/vagrant/5growth.5gr-ci/containerization/rl/rl_build_docker.sh
+        regexp: 'sudo docker-compose.*'
+        replace: 'sudo docker-compose build'
+        backup: yes
+
+    - name: Replace TAG with local (mon)
+      replace:
+        path: /home/vagrant/5growth.5gr-ci/containerization/monitoring_platform/docker-compose.yaml
+        regexp: '\$\{TAG\}'
+        replace: 'local'
+        backup: yes
+    - name: Replace TAG with local (so)
+      ansible.builtin.replace:
+        path: /home/vagrant/5growth.5gr-ci/containerization/so/docker-compose.yml
+        regexp: '\$\{TAG\}'
+        replace: 'local'
+        backup: yes
+    - name: Replace TAG with local (vs)
+      ansible.builtin.replace:
+        path: /home/vagrant/5growth.5gr-ci/containerization/vertical_slicer/docker-compose.yaml
+        regexp: '\$\{TAG\}'
+        replace: 'local'
+        backup: yes
+
+    - name: Replace TAG with local (rl)
+      ansible.builtin.replace:
+        path: /home/vagrant/5growth.5gr-ci/containerization/rl/docker-compose.yml
+        regexp: '\$\{TAG\}'
+        replace: 'local'
+        backup: yes
+
+    - name: Replace Branch (mon)
+      replace:
+        path: /home/vagrant/5growth.5gr-ci/containerization/monitoring_platform/mon_build_docker.sh
+        regexp: 'GIT_BRANCH=.*'
+        #replace: 'GIT_BRANCH=$GIT_CI'
+        replace: 'GIT_BRANCH="master"'
+        backup: yes
+    - name: Replace Branch (so)
+      ansible.builtin.replace:
+        path: /home/vagrant/5growth.5gr-ci/containerization/so/so_build_docker.sh
+        regexp: 'GIT_BRANCH=.*'
+        #replace: 'GIT_BRANCH=$GIT_CI'
+        replace: 'GIT_BRANCH="master"'
+        backup: yes
+        backup: yes
+    - name: Replace Branch (vs)
+      ansible.builtin.replace:
+        path: /home/vagrant/5growth.5gr-ci/containerization/vertical_slicer/vs_build_docker.sh
+        regexp: 'GIT_BRANCH=.*'
+        #replace: 'GIT_BRANCH=$GIT_CI'
+        replace: 'GIT_BRANCH="master"'
+        backup: yes
+        backup: yes
+    - name: Replace Branch (rl)
+      ansible.builtin.replace:
+        path: /home/vagrant/5growth.5gr-ci/containerization/rl/rl_build_docker.sh
+        regexp: 'GIT_BRANCH=.*'
+        #replace: 'GIT_BRANCH=$GIT_CI'
+        replace: 'GIT_BRANCH="master"'
+        backup: yes
+        backup: yes
+
+    - name: Replace project_ids in RL manifests (rl)
+      ansible.builtin.replace:
+        path: /home/vagrant/5growth.5gr-ci/containerization/rl/rl_build_docker.sh
+        regexp: 'project_id = project_to_replace'
+        replace: 'project_id = admin'
+        backup: yes
+        backup: yes

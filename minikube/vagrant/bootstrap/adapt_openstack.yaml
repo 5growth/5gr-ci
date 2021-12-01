@@ -1,0 +1,132 @@
+#-------------#
+##Configuring DEVSTACK
+- name: Stack configuration & installation
+  hosts: devstack
+  gather_facts: no
+  become: yes
+  become_user: stack
+  vars:
+    ansible_python_interpreter: /usr/bin/python2
+  tasks:
+    - name: Create SG rules (tcp)_item
+      openstack.cloud.security_group_rule:
+        security_group: default
+        protocol: "{{ item }}"
+        port_range_min: 1
+        port_range_max: 65535
+        remote_ip_prefix: 0.0.0.0/0
+        auth:
+          auth_url: http://10.168.123.10/identity
+          username: admin
+          password: admin
+          project_name: admin
+          project_domain_name: default
+          user_domain_name: default
+      loop:
+        - tcp
+        - udp
+
+    - name: Create SG rules (icmp)
+      openstack.cloud.security_group_rule:
+        security_group: default
+        protocol: icmp
+        port_range_min: -1
+        port_range_max: -1
+        remote_ip_prefix: 0.0.0.0/0
+        auth:
+          auth_url: http://10.168.123.10/identity
+          username: admin
+          password: admin
+          project_name: admin
+          project_domain_name: default
+          user_domain_name: default
+
+    - name: Create network
+      openstack.cloud.network:
+        state: present
+        name: local
+        project: admin
+        auth:
+          auth_url: http://10.168.123.10/identity
+          username: admin
+          password: admin
+          project_name: admin
+          project_domain_name: default
+          user_domain_name: default
+
+    - name:
+      openstack.cloud.subnet:
+        state: present
+        network_name: local
+        name: local_sub
+        cidr: 192.168.150.0/24
+        dns_nameservers:
+          - 8.8.4.4
+        auth:
+          auth_url: http://10.168.123.10/identity
+          username: admin
+          password: admin
+          project_name: admin
+          project_domain_name: default
+          user_domain_name: default
+
+    - name: Create router
+      openstack.cloud.router:
+        state: present
+        name: router
+        network: public
+        interfaces:
+#          - net: local
+#            subnet: local_sub
+#            portip: 192.168.150.1
+          - local_sub
+        auth:
+          auth_url: http://10.168.123.10/identity
+          username: admin
+          password: admin
+          project_name: admin
+          project_domain_name: default
+          user_domain_name: default
+
+    - name: Copy key
+      become: yes
+      become_user: root
+      copy:
+        src: /home/vagrant/sync/bootstrap/files/openstack-key.pub
+        dest: /opt/stack/devstack
+        owner: stack
+        group: stack
+        mode: 0600
+
+    - name: Create key
+      openstack.cloud.keypair:
+        state: present
+        name: sssakey
+        public_key_file: /opt/stack/devstack/openstack-key.pub
+        auth:
+          auth_url: http://10.168.123.10/identity
+          username: admin
+          password: admin
+          project_name: admin
+          project_domain_name: default
+          user_domain_name: default
+
+    - name: flavor
+      openstack.cloud.compute_flavor:
+        state: present
+        name: "{{ item }}"
+        ram: 64
+        vcpus: 1
+        disk: 1
+        auth:
+          auth_url: http://10.168.123.10/identity
+          username: admin
+          password: admin
+          project_name: admin
+          project_domain_name: default
+          user_domain_name: default
+      loop:
+        - flavor_probeserver
+        - flavor_spr1
+        - flavor_spr2
+        - flavor_webserver

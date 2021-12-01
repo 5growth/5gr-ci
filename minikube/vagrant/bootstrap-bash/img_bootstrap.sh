@@ -3,8 +3,8 @@
 GIT_MON="master"
 GIT_SO="master"
 GIT_VS="master"
-GIT_RL="master"
-GIT_CI="master"
+GIT_RL="work_version"
+GIT_CI="CDN_SSSA"
 
 echo "Creating debugging user with password Username: user, Password: passw0rd"
 adduser --quiet --disabled-password --shell /bin/bash --home /home/user --gecos "User with password ssh auth" user
@@ -29,27 +29,27 @@ sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 mkdir -p -m 0777 /mnt/registry
 
 echo "Cloning artifacts repo"
-cd ~/ 
-git clone https://github.com/5growth/5gr-ci > /dev/null 2>&1 && echo "Artifact repo cloned (branch: $GIT_CI)"
+cd ~/ && git clone -b $GIT_CI https://5gr-ci:foirr%3B6Gri@5growth.eu/git/5growth.5gr-ci > /dev/null 2>&1 && echo "Artifact repo cloned (branch: $GIT_CI)"
 
 echo "Starting private regestry"
 sudo docker run -d -p 5000:5000   --restart=always   --name registry -v /mnt/registry:/var/lib/registry  registry:2
 
 function script_mod {
+sed -i 's/5growth.eu/5gr-ci:foirr%3B6Gri@5growth.eu/g' $1_build_docker.sh
 sed -i 's/sudo docker-compose.*/sudo docker-compose build/g' $1_build_docker.sh
 sed -i 's/${TAG}/local/g' docker-compose.y*ml
 sed -i "s/GIT_BRANCH=.*/GIT_BRANCH=$2/" $1_build_docker.sh
 }
 
-cd ~/5gr-ci/containerization/monitoring_platform/	&& script_mod mon $GIT_MON	&& bash mon_build_docker.sh
-cd ~/5gr-ci/containerization/rl				&& script_mod rl $GIT_RL	&& ./rl_build_docker.sh
-cd ~/5gr-ci/containerization/so				&& script_mod so $GIT_SO	&& ./so_build_docker.sh
-cd ~/5gr-ci/containerization/vertical_slicer/           && script_mod vs $GIT_VS 	&& ./vs_build_docker.sh
+cd ~/5growth.5gr-ci/containerization/monitoring_platform/		&& script_mod mon $GIT_MON && bash mon_build_docker.sh
+cd ~/5growth.5gr-ci/containerization/rl			            		&& script_mod rl $GIT_RL && ./rl_build_docker.sh
+cd ~/5growth.5gr-ci/containerization/so					            && script_mod so $GIT_SO && ./so_build_docker.sh
+cd ~/5growth.5gr-ci/containerization/vertical_slicer/			  && script_mod vs $GIT_VS && ./vs_build_docker.sh
 
 sudo docker images | grep local | awk '{print $1":"$2}' | xargs -I % sudo docker tag  %  "img:5000/"%
 sudo docker images | grep 5000 | awk '{print $1":"$2}' | xargs -I % sudo docker push %
 
-cd ~/5gr-ci/containerization/cfy/
+cd ~/5growth.5gr-ci/containerization/cfy/
 
 cp docker-compose.yaml docker-compose.yaml.bkp
 cat << EOF > docker-compose.yaml
@@ -77,7 +77,7 @@ cat << EOF > cfy.sh
 sudo docker-compose up -d
 sleep 3
 sudo docker exec cfy_mano_local bash -c "until cfy plugins upload http://repository.cloudifysource.org/cloudify/wagons/cloudify-openstack-plugin/2.14.7/cloudify_openstack_plugin-2.14.7-py27-none-linux_x86_64-centos-Core.wgn -y http://www.getcloudify.org/spec/openstack-plugin/2.14.7/plugin.yaml; do echo nicht; done"
-sudo docker exec cfy_mano_local bash -c "until cfy plugins upload /home/centos/cloudify_mtp_plugin-0.0.1-py27-none-manylinux1_x86_64.wgn -y /home/centos/plugin.yaml; do echo nicht; done"
+sudo docker exec cfy_mano_local bash -c "until cfy plugins upload /home/centos/cloudify_mtp_plugin-0.0.1-centos-Core-py27.py36-none-linux_x86_64.wgn -y /home/centos/plugin.yaml; do echo nicht; done"
 EOF
 
 bash cfy.sh

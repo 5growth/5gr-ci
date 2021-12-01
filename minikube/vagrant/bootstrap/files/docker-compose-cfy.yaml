@@ -1,0 +1,17 @@
+version: "3"
+services:
+  cfy_mano_local:
+    container_name: cfy_mano_local
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - ../rl/rl_git/rl/plugins/Cloudify/MTP_plugin/:/home/centos
+    tmpfs:
+      - /run
+      - /run/lock
+    restart: unless-stopped
+    security_opt:
+      - seccomp:unconfined
+    network_mode: "host"
+    cap_add:
+      - SYS_ADMIN
+    image: cloudifyplatform/community:latest

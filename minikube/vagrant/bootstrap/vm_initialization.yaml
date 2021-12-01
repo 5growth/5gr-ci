@@ -1,0 +1,39 @@
+- name: VM initialization
+  hosts: all
+  serial: 3
+  become: yes
+  become_user: root
+  tasks:
+    - name: Add the 'ansible' user for devstack
+      user:
+        name: ansible
+        comment: ansible user
+        shell: /bin/bash
+        # Definition of a custom user HOME directory, according to the DevStack recommendation
+        home: /home/ansible
+
+    - name: Make 'ansible' a privileged user
+      copy:
+        content: "ansible ALL=(ALL) NOPASSWD: ALL"
+        dest: /etc/sudoers.d/ansible
+        mode: 0440
+
+    # Without the `acl` package you may (and probably will) experience permission related issues
+    - name: Install acl to fix unprivileged user error
+      package:
+        name: acl
+        state: present
+
+    - name: Add the 'user' user for devstack
+      user:
+        name: user
+        comment: Passworded user
+        shell: /bin/bash
+        # Definition of a custom user HOME directory, according to the DevStack recommendation
+        home: /home/user
+
+    - name: Make 'user' a privileged user
+      copy:
+        content: "user ALL=(ALL) NOPASSWD: ALL"
+        dest: /etc/sudoers.d/user
+        mode: 0440

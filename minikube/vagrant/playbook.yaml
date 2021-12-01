@@ -1,0 +1,6 @@
+---
+- import_playbook: bootstrap/vm_initialization.yaml
+- import_playbook: bootstrap/vm_docker_installation.yaml
+- import_playbook: bootstrap/devstack_installation.yaml
+- import_playbook: bootstrap/img_provisioning.yaml
+- import_playbook: bootstrap/minikube_installation.yaml

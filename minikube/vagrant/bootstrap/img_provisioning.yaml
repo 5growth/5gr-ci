@@ -1,0 +1,5 @@
+- import_playbook: img/registry.yaml
+- import_playbook: img/configure_builds.yaml
+- import_playbook: img/build.yaml
+- import_playbook: img/push_registry.yaml
+- import_playbook: img/cloudify.yaml

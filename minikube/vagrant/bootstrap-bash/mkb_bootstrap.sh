@@ -1,5 +1,5 @@
 #!/bin/bash
-GIT_CI="master"
+GIT_CI="CDN_SSSA"
 echo "Creating debugging user with password Username: user, Password: passw0rd"
 adduser --quiet --disabled-password --shell /bin/bash --home /home/user --gecos "User with password ssh auth" user
 echo "user:passw0rd" | chpasswd
@@ -38,14 +38,13 @@ sudo cp -r /root/.kube $HOME && sudo cp -r /root/.minikube $HOME
 sudo chown -R $USER:$USER $HOME/.kube $HOME/.minikube
 EOF
 
-#&v
-git clone https://github.com/5growth/5gr-ci
+#mkdir -p /storage01/{broker,so-storage}
+git clone -b $GIT_CI https://5gr-ci:foirr%3B6Gri@5growth.eu/git/5growth.5gr-ci
 for file in $(ls *.y*aml)
 do
-#&v
-sed -i "s&https://github.com/5growth/5gr-ci& -b $GIT_CI clone https://github.com/5growth/5gr-ci&g" $file
+sed -i "s&https://5gr-ci:foirr%3B6Gri@5growth.eu/git/5growth.5gr-ci& -b $GIT_CI clone https://5gr-ci:foirr%3B6Gri@5growth.eu/git/5growth.5gr-ci&g" $file
 done
-cd 5gr-ci/minikube/local
+cd 5growth.5gr-ci/minikube/local
 kubectl apply -f monitoring_platform.yaml
 kubectl apply -f so.yaml
 kubectl apply -f vs.yaml

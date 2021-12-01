@@ -1,0 +1,207 @@
+#minikube_installation.yaml
+- name: VM minikube installation
+  hosts: minikube
+  become: yes
+  become_user: root
+#  ansible_python_interpreter: /usr/bin/python2
+#  module_defaults:
+#    group/k8s:
+#      Namespace: default
+  tasks:
+    - name: Add K8s GPG apt Key
+      apt_key:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        state: present
+      tags:
+        - repo
+        - repo_key
+        - k8s
+
+    - name: Add Kubernetes Repository
+      apt_repository:
+        repo: deb [arch=amd64] https://apt.kubernetes.io/ kubernetes-xenial main
+        state: present
+      tags:
+        - repo
+        - k8s
+
+    - name: Update apt and install kubectl
+      apt: update_cache=yes name=kubectl state=latest
+      tags:
+        - k8s
+
+    - name: Install (get url) minikube
+      get_url:
+        url: https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+        dest: /home/vagrant/minikube
+        group: vagrant
+#        user: vagrant
+      tags:
+        - minikube
+        - urlminikube
+        - url
+        - k8s
+
+#    - name: Install docker required system packages
+#      apt: name={{ item }} state=latest update_cache=yes
+#      loop: [ 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'python-pip',
+#'python3-pip', 'virtualenv', 'python3-setuptools', 'gnupg2', 'conntrack']
+#
+##'python-lxml', 'python-libvirt', 'qemu-kvm', 'firewalld', 'libvirt-daemon-system', 'dnsmasq'
+    - name: Create minikube directory
+      file:
+        path: /usr/local/bin/
+        state: "directory"
+#        owner: "vagrant"
+#        group: "vagrant"
+#        mode: "0777"
+      tags:
+        - minikube
+        - k8s
+
+    - name: Installing minikube
+      shell: bash -lc "cd /home/vagrant/ && install minikube /usr/local/bin/"
+      args:
+#        chdir: "/home/vagrant/minikube"
+#      register: shellout
+#    - debug: var=shellout.stdout
+      tags:
+        - minikube
+        - k8s
+
+    - name: Starting minikube
+      shell: bash -lc "minikube start --vm-driver=none"
+      args:
+       chdir: "/home/vagrant/"
+#      register: shellout
+#    - debug: var=shellout.stdout
+      tags:
+        - minikube
+        - k8s
+
+    - name: Copy minikube's auth files
+      shell: bash -lc "sudo cp -r /root/.kube /home/vagrant/ && sudo cp -r /root/.minikube /home/vagrant/"
+#      args:
+#        chdir: "/home/vagrant/"
+#      register: shellout
+#    - debug: var=shellout.stdout
+      tags:
+        - minikube
+        - k8s
+
+#    - name: Change file ownership, group and permissions on minikube's auth files
+#      ansible.builtin.file:
+#        path: /home/vagrant/.kube
+#        owner: vagrant
+#        group: vagrant
+#        mode: '0764'
+#      tags:
+#        - minikube
+#        - k8s
+
+    - name: Change file ownership, group and permissions on minikube's auth files
+      ansible.builtin.file:
+        path: /home/vagrant/{{ item }}
+        owner: vagrant
+        group: vagrant
+        mode: '0764'
+        state: directory
+      loop:
+        - .minikube
+        - .kube
+      tags:
+        - minikube
+        - k8s
+
+#    - name: Copy minikube's auth files
+#      copy:
+#        dest: /home/vagrant/
+#        owner: "vagrant"
+#        group: "vagrant"
+#        mode: 0764
+
+#    - name: Deploy component in minikube
+#      shell: bash -lc "kubectl apply -f monitoring_platform.yaml"
+#      args:
+#        chdir: "/home/vagrant/5growth.5gr-ci/minikube/local"
+
+#    - name: Copy a script (project ID)
+#      copy:
+#        src: devstack_project_id_to_rl.sh
+#        dest: /home/vagrant/devstack_project_id_to_rl.sh
+#        owner: "vagrant"
+#        group: "vagrant"
+#        mode: 0764
+#      tags:
+#        - projectid
+
+
+#    - name: Run a script (project ID)
+#      shell: bash devstack_project_id_to_rl.sh
+#      args:
+#        chdir: "/home/vagrant/"
+#      register: shellout
+#    - debug: var=shellout.stdout
+#      tags:
+#        - projectid
+#        - projectid_run
+
+#    - name: Create a Deployment by reading the definition from a local file (all)
+#      community.kubernetes.k8s:
+#        namespace: default
+#        state: present
+#        src: /home/vagrant/5growth.5gr-ci/minikube/local
+#        validate:
+#          fail_on_error: yes
+#      tags:
+#        - manifests
+
+    - name: Create a Deployment by reading the definition from a local file (mon)
+      community.kubernetes.k8s:
+        namespace: default
+        state: present
+        src: /home/vagrant/5growth.5gr-ci/minikube/local/monitoring_platform.yaml
+        validate:
+          fail_on_error: yes
+      tags:
+        - manifests
+
+    - name: Create a Deployment by reading the definition from a local file (so)
+      community.kubernetes.k8s:
+        namespace: default
+        state: present
+        src: /home/vagrant/5growth.5gr-ci/minikube/local/so.yaml
+        validate:
+          fail_on_error: yes
+      tags:
+        - manifests
+
+    - name: Create a Deployment by reading the definition from a local file (vs)
+      community.kubernetes.k8s:
+        namespace: default
+        state: present
+        src: /home/vagrant/5growth.5gr-ci/minikube/local/vs.yaml
+        validate:
+          fail_on_error: yes
+      tags:
+        - manifests
+
+    - name: Create a Deployment by reading the definition from a local file (rl)
+      community.kubernetes.k8s:
+        namespace: default
+        state: present
+        src: /home/vagrant/5growth.5gr-ci/minikube/local/rl.yaml
+        validate:
+          fail_on_error: yes
+      tags:
+        - manifests
+
+    - name: Create a Deployment by reading the definition from a local file (repo-config)
+      community.kubernetes.k8s:
+        namespace: default
+        state: present
+        src: /home/vagrant/5growth.5gr-ci/minikube/local/repo-configs.yaml
+        validate:
+          fail_on_error: yes
+      tags:
+        - manifests

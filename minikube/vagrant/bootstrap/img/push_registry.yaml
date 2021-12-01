@@ -1,0 +1,79 @@
+- name: VM img provisioning
+  hosts: img
+  become: yes
+  become_user: root
+  tasks:
+
+    - name: Tag and push to local registry (mon_platform)
+      community.docker.docker_image:
+        name: mon_platform
+        repository: img:5000/mon_platform
+        tag: local
+        push: yes
+        source: local
+      tags:
+        - push
+        - mon
+    - name: Tag and push to local registry (vs_app)
+      community.docker.docker_image:
+        name: vs_app
+        repository:  img:5000/vs_app
+        tag: local
+        push: yes
+        source: local
+    - name: Tag and push to local registry (vs_postgres)
+      community.docker.docker_image:
+        name: vs_postgres
+        repository:  img:5000/vs_postgres
+        tag: local
+        push: yes
+        source: local
+    - name: Tag and push to local registry (so_app)
+      community.docker.docker_image:
+        name: so_app
+        repository:  img:5000/so_app
+        tag: local
+        push: yes
+        source: local
+    - name: Tag and push to local registry (so_pa_generic)
+      community.docker.docker_image:
+        name: pa_generic
+        repository:  img:5000/pa_generic
+        tag: local
+        push: yes
+        source: local
+    - name: Tag and push to local registry (rlvim)
+      community.docker.docker_image:
+        name: rlvim
+        repository:  img:5000/rlvim
+        tag: local
+        push: yes
+        source: local
+    - name: Tag and push to local registry (mtpwim)
+      community.docker.docker_image:
+        name: mtpwim
+        repository:  img:5000/mtpwim
+        tag: local
+        push: yes
+        source: local
+    - name: Tag and push to local registry (rl_app)
+      community.docker.docker_image:
+        name: rl_app
+        repository:  img:5000/rl_app
+        tag: local
+        push: yes
+        source: local
+    - name: Tag and push to local registry (rl_openstack_plugin)
+      community.docker.docker_image:
+        name: rl_app
+        repository:  img:5000/rl_app
+        tag: local
+        push: yes
+        source: local
+    - name: Tag and push to local registry (rl_openstack_plugin)
+      community.docker.docker_image:
+        name: rl_openstack_plugin
+        repository:  img:5000/rl_openstack_plugin
+        tag: local
+        push: yes
+        source: local

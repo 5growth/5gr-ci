@@ -1,0 +1,22 @@
+- name: VM img provisioning
+  hosts: img
+  become: yes
+  become_user: root
+  tasks:
+
+    - name: Make docker-compose for cloudify
+      copy:
+        src: /home/vagrant/sync/bootstrap/files/docker-compose-cfy-ansible.yaml
+        dest: /home/vagrant/docker-compose.yaml
+        owner: "vagrant"
+        group: "vagrant"
+        mode: 0764
+
+    - name: Run docker-compose up services (cfy)
+      community.docker.docker_compose:
+        project_src: /home/vagrant/
+        build: yes
+      register: output
+
+    - name: Run a cfy script to install plugins (Cloudify)
+      ansible.builtin.script: /home/vagrant/sync/bootstrap/files/cfy.sh

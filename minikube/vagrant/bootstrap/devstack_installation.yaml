@@ -1,0 +1,133 @@
+- name: VM devstack installation
+  hosts: devstack
+  become: yes
+  become_user: root
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+    sysctl_config:
+      net.ipv4.ip_forward: 1
+      net.ipv4.conf.default.rp_filter: 0
+      net.ipv4.conf.all.rp_filter: 0
+  tasks:
+    - name: Add the 'stack' user for devstack
+      user:
+        name: stack
+        comment: stack user
+        shell: /bin/bash
+        # Definition of a custom user HOME directory, according to the DevStack recommendation
+        home: /opt/stack
+
+    - name: Make 'stack' a privileged user
+      copy:
+        content: "stack ALL=(ALL) NOPASSWD: ALL"
+        dest: /etc/sudoers.d/stack
+        mode: 0440
+
+    - name: Upgrade all apt packages
+      apt: upgrade=dist force_apt_get=yes
+    - name:
+      apt: name={{ item }} state=latest update_cache=yes
+      loop:
+        - bridge-utils
+        - python-pip
+        - python3-pip
+        - build-essential
+        - autoconf
+        - libtool
+        - pkg-config
+        - python-opengl
+        - python-pil
+        - python-pyrex
+        - python-pyside.qtopengl
+        - idle-python2.7
+        - qt4-dev-tools
+        - qt4-designer
+        - libqtgui4
+        - libqtcore4
+        - libqt4-xml
+        - libqt4-test
+        - libqt4-script
+        - libqt4-network
+        - libqt4-dbus
+        - python-qt4
+        - python-qt4-gl
+        - libgle3
+        - python-dev
+        - uwsgi-plugins-all
+
+    - name: Update PIP2
+      pip:
+        name:
+          - pip
+          - setuptools
+          - twine
+          - cryptography
+          - openstacksdk
+        state: latest
+        executable: pip2
+
+#    - name: PIP openstack
+#      pip:
+#        name:
+#          - openstacksdk
+#        state: latest
+#        executable: pip2
+#
+    - name: Change various sysctl-settings
+      sysctl:
+        name: '{{ item.key }}'
+        value: '{{ item.value }}'
+        sysctl_set: yes
+        state: present
+        reload: yes
+        ignoreerrors: yes
+      with_dict: '{{ sysctl_config }}'
+
+- name: Stack configuration & installation
+  hosts: devstack
+  gather_facts: no
+  become: yes
+  become_user: stack
+  vars:
+    ansible_python_interpreter: /usr/bin/python2
+  tasks:
+    - name: Update PIP2
+      pip:
+        name:
+          - pip
+          - setuptools
+          - twine
+        state: latest
+        executable: pip2
+
+    - name: Update PIP2
+      pip:
+        name:
+          - setuptools_rust
+          - cryptography
+          - openstacksdk
+        state: latest
+        executable: pip2
+
+    - name: Clone DevStack
+      git:
+        repo: https://git.openstack.org/openstack-dev/devstack
+        dest: /opt/stack/devstack
+        version: stable/stein
+
+    - name: Create local.conf
+      ansible.builtin.template:
+        src: /home/vagrant/sync/bootstrap/files/local.j2
+        dest: /opt/stack/devstack/local.conf
+        owner: stack
+        group: stack
+        mode: u=rw,g=r,o=r
+
+    - name: Run devstack
+      shell: bash stack.sh
+      args:
+        chdir: /opt/stack/devstack/
+
+##Configuring DEVSTACK
+- import_playbook: adapt_openstack.yaml
+
